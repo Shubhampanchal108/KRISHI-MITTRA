@@ -1,4 +1,3 @@
-````markdown
 # 🌾 Krishi-Mittra — Smart Farming Assistant
 
 Krishi-Mittra is an **AI-powered, multilingual mobile application** that provides farmers with real-time, location-based agricultural advisory.  
@@ -46,7 +45,6 @@ It empowers farmers by offering soil health analysis, fertilizer guidance, pest 
    ```bash
    git clone https://github.com/Shubhampanchal108/KRISHI-MITTRA.git
    cd Krishi-Mittra
-````
 
 2. **Install Dependencies**
 
