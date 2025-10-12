@@ -1,21 +1,14 @@
 import React from "react";
-import { View, Text } from "react-native";
-import Login from "./src/screens/login";
-import Signup from './src/screens/signUp'
-import HomeScreen from './src/screens/Home'
-import ChatBot from './src/screens/ChatBot'
-import LanguageSelectScreen from './src/screens/Langauges'
-import MarketPriceScreen from './src/screens/MarektPrice'
+import HomeScreen from './app/Home'
+import { View } from "react-native"
+import Pest from './app/Pest'
+
 
 const App = () => {
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      {/* <Login/> */}
-      {/* <Signup/> */}
-      {/* <HomeScreen/> */}
-      {/* <MarketPriceScreen/> */}
-      {/* <ChatBot/> */}
-      {/* <LanguageSelectScreen/> */}
+    <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
+    <HomeScreen/>
+    {/* <Pest></Pest> */}
     </View>
   );
 };

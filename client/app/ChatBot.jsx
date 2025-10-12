@@ -11,6 +11,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import NavigationTab from "../src/components/NavigationTab";
+import HeaderTab from "../src/components/HeaderTab";
+
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -34,14 +37,12 @@ const Chatbot = () => {
   };
 
   return (
+    <>
+    <HeaderTab/>
     <SafeAreaView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Krishi Mittra</Text>
-      </View>
 
       {/* Messages */}
       <FlatList
@@ -84,44 +85,34 @@ const Chatbot = () => {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+    <NavigationTab/>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#A5D6A7",
+    backgroundColor: "#e0ebe0ff",
     marginBottom: 10,
     width: '100%',
-    height: '80%'
-  },
-  header: {
-    paddingVertical: 15,
-    marginTop: 10,
-    backgroundColor: "#4CAF50",
-    borderBottomWidth: 1,
-    borderBottomColor: "#A5D6A7",
-  },
-  headerText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    
+    height: '100%'
   },
   messageBubble: {
     maxWidth: "80%",
     padding: 10,
     borderRadius: 15,
-    marginVertical: 5,
+    marginVertical: 2,
   },
   botBubble: {
     backgroundColor: "#C8E6C9",
     alignSelf: "flex-start",
+    borderBottomLeftRadius: 0,
   },
   userBubble: {
     backgroundColor: "#4CAF50",
     alignSelf: "flex-end",
+    borderBottomRightRadius: 0,
   },
   botText: {
     color: "#1B5E20",
@@ -137,12 +128,15 @@ const styles = StyleSheet.create({
     padding: 10,
     borderTopWidth: 1,
     borderTopColor: "#C8E6C9",
-    backgroundColor: "#A5D6A7",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: "#93df93ff",
+    marginBottom: -54,
   },
   input: {
     flex: 1,
     backgroundColor: "#F1F8E9",
-    borderRadius: 20,
+    borderRadius: 10,
     paddingHorizontal: 15,
     height: 50,
     color: "#333",
