@@ -11,7 +11,7 @@ It empowers farmers by offering soil health analysis, fertilizer guidance, pest 
 - 🧠 **AI-Powered Recommendations:** Personalized suggestions using an open-source LLM model.  
 - 🌱 **Soil Health Analysis:** Smart fertilizer and soil management guidance.  
 - 🐛 **Pest & Disease Detection:** Upload images to detect plant diseases instantly using AI.  
-- 🎙️ **Voice Interaction:** Voice-based support for low-literate users.  
+- 🎙️ **Voice Interaction:** Voice-based support for low- literate users.  
 - 📊 **Feedback System:** Collects user feedback for continuous improvement.  
 - 📡 **Live Streaming:** Powered by Gemini Live API for real-time expert sessions and field monitoring.  
 - ☁️ **External Integrations:** Weather and Market APIs for instant, accurate data.
