@@ -1,37 +1,40 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView } from "react-native";
+import { useRouter } from 'expo-router';
 
 const AgriAISupport = () => {
+  const Router = useRouter()
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Krishi Mittra Services</Text>
 
       <View style={styles.cardContainer}>
         {/* Chat Card */}
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={()=>Router.push("/ChatBot")}>
           <Image source={require("../../assets/images/chat.png")} style={styles.icon} />
           <Text style={styles.title}>Chat</Text>
           <Text style={styles.subtitle}>Get instant farming advice</Text>
         </TouchableOpacity>
 
         {/* Disease Scanner Card */}
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={()=>Router.push("/Pest")}>
           <Image source={require("../../assets/images/scanner.png")} style={styles.icon} />
           <Text style={styles.title}>Disease Scanner</Text>
           <Text style={styles.subtitle}>Identify plant problems</Text>
         </TouchableOpacity>
 
         {/* Smart Recommendations Card */}
-        <TouchableOpacity style={styles.card}>
-          <Image source={require("../../assets/images/sp.jpeg")} style={styles.icon} />
-          <Text style={styles.title}>Smart Advise</Text>
-          <Text style={styles.subtitle}>Get personalized advice</Text>
+        <TouchableOpacity style={styles.card} onPress={()=>Router.push('/MarektPrice')}>
+          <Image source={require("../../assets/images/MarketLogo.png")} style={styles.icon} />
+          <Text style={styles.title}>Market Trends</Text>
+          <Text style={styles.subtitle}>Get latest mandi prices.</Text>
         </TouchableOpacity>
 
         {/* Agri AI News Card */}
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={()=>Router.push('')}>
           <Image source={require("../../assets/images/sp.jpeg")} style={styles.icon} />
-          <Text style={styles.title}>Live Advise</Text>
+          <Text style={styles.title}>Live Chat</Text>
           <Text style={styles.subtitle}>Lets talk in realtime with AI</Text>
         </TouchableOpacity>
       </View>

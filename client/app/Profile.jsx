@@ -3,8 +3,43 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "rea
 import { Ionicons, MaterialIcons, FontAwesome5, FontAwesome } from "@expo/vector-icons";
 import NavTab from '../src/components/NavigationTab'
 import HeaderTab from "../src/components/HeaderTab";
+import {errorMsg, successMsg} from '../src/utils/Notification'
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import FeedbackModal from "../src/components/Modal";
+import EditProfileModal from "../src/components/EditProfile";
 
 const Profile = () => {
+
+  const Router = useRouter()
+
+  const [modalVisible, setModalVisible] = React.useState(false);
+  const [editModalVisible, setEditModalVisible] = React.useState(false);
+
+  const [name, setName] = React.useState(`${AsyncStorage.getItem('name')}`);
+  const [state, setState] = React.useState(`${AsyncStorage.getItem('state')}`);
+  const [district, setDistrict] = React.useState(`${AsyncStorage.getItem('district')}`);
+  const [password, setPassword] = React.useState('');
+
+  const handleLogout = async()=>{
+    try {
+      AsyncStorage.removeItem('token');
+      // AsyncStorage.removeItem('name');
+      // AsyncStorage.removeItem('userId');
+      // AsyncStorage.removeItem('phone');
+      // AsyncStorage.removeItem('state');
+      // AsyncStorage.removeItem('district');
+
+      successMsg("Logout Succesfully.")
+      setTimeout(()=>{
+        Router.push('/login')
+      }, 1000)
+
+    } catch (error) {
+      errorMsg("Opps! something went wrong.")
+      console.log(error)
+    }
+  }
   return (
     <>
     <HeaderTab/>
@@ -19,9 +54,9 @@ const Profile = () => {
             style={styles.profileImage}
           />
           <View style={styles.profileInfo}>
-            <Text style={styles.name}>Shubham</Text>
-            <TouchableOpacity>
-              <Text style={styles.editProfile}>✏️ Edit Profile</Text>
+            <Text style={styles.name}>{AsyncStorage.getItem('name')}</Text>
+            <TouchableOpacity onPress={()=>setEditModalVisible(true)}>
+              <Text style={styles.editProfile}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -32,7 +67,7 @@ const Profile = () => {
 
           <TouchableOpacity style={styles.linkItem}>
             <Ionicons name="qr-code-outline" size={20} color="#333" />
-            <Text style={styles.linkText}>subscribe</Text>
+            <Text style={styles.linkText}>Subscribe</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.linkItem}>
@@ -45,7 +80,7 @@ const Profile = () => {
             <Text style={styles.linkText}>Government Schemes</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.linkItem}>
+          <TouchableOpacity style={styles.linkItem} onPress={() => setModalVisible(true)}>
             <FontAwesome name="newspaper-o" size={18} color="#333" />
             <Text style={styles.linkText}>Feedback</Text>
           </TouchableOpacity>
@@ -60,13 +95,29 @@ const Profile = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Others Links</Text>
 
-          
-
           <TouchableOpacity style={styles.linkItem}>
-            <FontAwesome5 name="" size={18} color="#333" />
+            <FontAwesome5 name="shield-alt" size={18} color="#333" />
             <Text style={styles.linkText}>Privacy Policy</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.linkItem} onPress={handleLogout}>
+            <FontAwesome5 name="exclamation" size={18} color="#333" />
+            <Text style={styles.linkText}>Logout</Text>
+          </TouchableOpacity>
         </View>
+        <FeedbackModal visible={modalVisible} onClose={() => setModalVisible(false)} onSubmit={(feedback) => console.log(feedback)} />
+
+          <EditProfileModal
+            visible={editModalVisible}
+            onClose={() => setEditModalVisible(false)}
+            onSubmit={(data) => console.log(data)}
+            initialData={{
+              name: AsyncStorage.getItem('name'),
+              state: AsyncStorage.getItem('state'),
+              district: AsyncStorage.getItem('district'),
+              password: AsyncStorage.getItem('password'),
+            }}
+          />
       </ScrollView>
 
       {/* Bottom Navigation */}

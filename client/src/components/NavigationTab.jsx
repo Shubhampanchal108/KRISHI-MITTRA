@@ -13,13 +13,13 @@ const NavigationTab = () => {
   return (
     <SafeAreaView edges={["bottom"]} style={styles.container}>
       {/* Home */}
-      <TouchableOpacity style={styles.tabButton} onPress={() => router.push("/")}>
+      <TouchableOpacity style={styles.tabButton} onPress={() => router.push("/Home")}>
         <Ionicons
           name="home-outline"
           size={26}
-          color={isActive("/") ? "#1B5E20" : "#A5D6A7"}
+          color={isActive("/Home") ? "#1B5E20" : "#A5D6A7"}
         />
-        <Text style={[styles.label, { color: isActive("/") ? "#1B5E20" : "#A5D6A7" }]}>
+        <Text style={[styles.label, { color: isActive("/Home") ? "#1B5E20" : "#A5D6A7" }]}>
           Home
         </Text>
       </TouchableOpacity>
@@ -94,10 +94,11 @@ const styles = StyleSheet.create({
   tabButton: {
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 25,
   },
   label: {
     fontSize: 12,
-    marginTop: 2,
+    marginTop: 0,
     fontWeight: "600",
   },
 });

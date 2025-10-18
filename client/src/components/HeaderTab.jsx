@@ -32,7 +32,8 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     borderBottomWidth: 1.2,
     borderBottomColor: "#A5D6A7",
-    width : "100%"
+    width : "100%",
+    paddingHorizontal: 5,
   },
   logoContainer: {
     flexDirection: "row",

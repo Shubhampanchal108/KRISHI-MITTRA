@@ -8,11 +8,9 @@ const pestDetectionSchema = new mongooose.Schema({
     },
     detectedPest: {
         type: String,
-        required: true
     },
     confidence: {
-        type: Number,
-        required: true
+        type: Number
     },
     recommendedTreatment: {
         type: String,

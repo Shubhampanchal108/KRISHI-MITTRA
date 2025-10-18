@@ -10,12 +10,63 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
+import axios from 'axios'
+import Toast from 'react-native-toast-message';
+import { URL } from '@/App';
+import {successMsg, errorMsg} from '../src/utils/Notification'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+
 
 const Signup = () => {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('')
+  const [state, setState] = useState('')
+  const [district, setDistrict] = useState('')
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  
+  const Router = useRouter();
+  
+  //handle signup logic here
+  const handleSignup = async () => {
+  if (!name || !mobile || !state || !district || !password) {
+    errorMsg("Please fill all fields!");
+    return;
+  }
+
+  try {
+    const data = {name, phone:mobile, state, district, password}
+    const response = await axios.post(`${URL}/api/main/signup`, data);
+
+    if (response.data) {
+      successMsg("SignUp successfully.");
+
+      setName("");
+      setPassword("");
+      setMobile("");
+      setState("");
+      setDistrict("");
+
+      AsyncStorage.setItem('token', response.data.token);
+      AsyncStorage.setItem('name', response.data.user.name);
+      AsyncStorage.setItem('userId', response.data.user._id);
+      AsyncStorage.setItem('phone', response.data.user.phone);
+      AsyncStorage.setItem('state', response.data.user.state);
+      AsyncStorage.setItem('district', response.data.user.district);
+
+      setTimeout(() => {
+        Router.push('/Home')
+      }, 2000);
+
+    }
+  } catch (e) {
+    const msg = e.response?.data?.message || "Internal Server Error.";
+    errorMsg(msg);
+    console.log(e);
+  }
+};
+
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,7 +75,7 @@ const Signup = () => {
         <View style={styles.innerContainer}>
           {/* App Logo */}
           {/* <Image
-            source={require('../assets/agrimate-logo.png')}
+            source={require('../assets/images/logo.jpeg')}
             style={styles.logo}
           /> */}
 
@@ -46,8 +97,8 @@ const Signup = () => {
             style={styles.input}
             placeholder="Mobile"
             placeholderTextColor="#6b7280"
-            value={email}
-            onChangeText={setEmail}
+            value={mobile}
+            onChangeText={setMobile}
             keyboardType="phone-pad"
             autoCapitalize="none"
             autoCorrect={false}
@@ -60,8 +111,8 @@ const Signup = () => {
             style={styles.input}
             placeholder="State"
             placeholderTextColor="#6b7280"
-            value={password}
-            onChangeText={setPassword}
+            value={state}
+            onChangeText={setState}
           />
 
           {/* District */}
@@ -69,8 +120,8 @@ const Signup = () => {
             style={styles.input}
             placeholder="District"
             placeholderTextColor="#6b7280"
-            value={password}
-            onChangeText={setPassword}
+            value={district}
+            onChangeText={setDistrict}
           />
 
           {/* Password Input */}
@@ -83,30 +134,21 @@ const Signup = () => {
             secureTextEntry
           />
 
-          {/* Confirm Password Input */}
-          {/* <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            placeholderTextColor="#6b7280"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-          /> */}
-
           {/* Signup Button */}
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={handleSignup}>
             <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
 
           {/* Footer Link */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account? </Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => Router.push('/login')}>
               <Text style={styles.loginText}>Login</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+      <Toast/>
     </SafeAreaView>
   );
 };
@@ -134,7 +176,8 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
+    borderRadius: 50,
   },
   title: {
     fontSize: 23,

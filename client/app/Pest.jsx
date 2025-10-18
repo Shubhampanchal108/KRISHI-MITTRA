@@ -1,83 +1,110 @@
-import React from 'react'
-import HeaderTab from '../src/components/HeaderTab'
-import NavigationTab from '../src/components/NavigationTab'
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native'
-import AIAdviceCard from '@/src/components/AIAdvise'
+import React from "react";
+import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Image, Alert } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import HeaderTab from "../src/components/HeaderTab";
+import NavigationTab from "../src/components/NavigationTab";
+import AIAdviceCard from "@/src/components/AIAdvise";
 
 const Pest = () => {
+  const [imageUrl, setImageUrl] = React.useState(null);
+
+  // Function for choosing image
+  const pickImage = async () => {
+    Alert.alert(
+      "Select Option",
+      "Choose image source",
+      [
+        { text: "📷 Camera", onPress: () => openCamera() },
+        { text: "🖼️ Gallery", onPress: () => openGallery() },
+        { text: "Cancel", style: "cancel" },
+      ]
+    );
+  };
+
+  // Open Camera
+  const openCamera = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      alert("Camera permission is required!");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: false,
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const image = result.assets[0];
+      setImageUrl(image.uri);
+      console.log("Camera Image URI:", image.uri);
+    }
+  };
+
+  // Open Gallery
+  const openGallery = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      alert("Permission to access gallery is required!");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const image = result.assets[0];
+      setImageUrl(image.uri);
+      console.log("Gallery Image URI:", image.uri);
+    }
+  };
+
   return (
     <>
-    <HeaderTab/>
-<ScrollView>
-    {/* <Text className={styles.adviceTitle}>Detect Pests and Desieases</Text> */}
-    <View  style={styles.adviceContainer}>
-              <Text style={styles.adviceTitle}>Detect Pests and Dieases</Text>
-              <Text style={styles.adviceSubtitle}>
-                Upload or click an image to detect pest/disease and get instant
-                advice.
-              </Text>
-    
-              <TouchableOpacity
-                style={styles.adviceButton}
-                onPress={() => alert("Opening Camera / Gallery...")}
-              >
-                <Text style={styles.adviceButtonText}>📷 Upload</Text>
-              </TouchableOpacity>
+      <HeaderTab />
 
-            </View>
-            <View style={styles.adviceCard}><AIAdviceCard/></View>
-              
-            </ScrollView>
-    <NavigationTab/>
+
+      <ScrollView>
+      {/* Show Selected Image */}
+      {imageUrl && (
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.previewImage}
+        />
+      )}
+        <View style={styles.adviceContainer}>
+          <Text style={styles.adviceTitle}>Detect Pests and Diseases</Text>
+          <Text style={styles.adviceSubtitle}>
+            Upload or click an image to detect pest/disease and get instant advice.
+          </Text>
+
+          <TouchableOpacity style={styles.adviceButton} onPress={pickImage}>
+            <Text style={styles.adviceButtonText}>📷 Upload Image</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.adviceCard}>
+          <AIAdviceCard title="Advice based on image" secondTitle="Our Advice" advice='fdklsajjjjjjjjjjjjjjjjjj;;;;;;;;;;;;;;;;;;;;;;;;;;'  />
+        </View>
+      </ScrollView>
+
+      <NavigationTab />
     </>
-  )
-}
+  );
+};
 
-export default Pest
+export default Pest;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-    paddingHorizontal: 13,
+  previewImage: {
+    width: 340,
+    height: 200,
+    alignSelf: "center",
+    marginTop: 20,
+    borderRadius: 10,
+    resizeMode: "cover",
   },
-  
-adviceCard:{
-    margin:13,
-},
-  mainContent: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 10
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1B5E20",
-    marginBottom: 10,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: "#555",
-    textAlign: "center",
-    paddingHorizontal: 20,
-  },
-  tabBar: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "white",
-  },
-  tabItem: {
-    alignItems: "center",
-  },
-  tabLabel: {
-    fontSize: 12,
-    marginTop: 2,
-    color: "#777",
+  adviceCard: {
+    margin: 13,
   },
   adviceContainer: {
     backgroundColor: "#F0FAF3",
@@ -92,7 +119,6 @@ adviceCard:{
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 2,
-    height: "220",
   },
   adviceTitle: {
     fontSize: 18,
@@ -115,35 +141,5 @@ adviceCard:{
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-  },
-
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 5,
-    margin: 16,
-  },
-  image: {
-    width: 80,
-    height: 80,
-    marginBottom: 12,
-    borderRadius: 40,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#777",
-    marginTop: 4,
-    textAlign: "center",
   },
 });

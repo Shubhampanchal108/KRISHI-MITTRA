@@ -2,12 +2,12 @@ import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const AIAdviceCard = () => {
+const AIAdviceCard = ({title, secondTitle, advice, onClick}) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <Ionicons name="bulb-outline" size={26} color="#1B5E20" />
-        <Text style={styles.heading}>Today's AI Advice</Text>
+        <Text style={styles.heading}>{title}</Text>
       </View>
 
       <View style={styles.contentBox}>
@@ -16,25 +16,16 @@ const AIAdviceCard = () => {
           style={styles.image}
         /> */}
         <View style={styles.textSection}>
-          <Text style={styles.title}>Weather-based Farming Tip</Text>
+          <Text style={styles.title}>{secondTitle}</Text>
           <Text style={styles.adviceText}>
-            आज हल्की बारिश की संभावना है ☁️  
-            इसलिए फसलों की सिंचाई को थोड़ा टाल दें और मिट्टी की नमी बनाए रखें।
-            आज हल्की बारिश की संभावना है ☁️  
-            इसलिए फसलों की सिंचाई को थोड़ा टाल दें और मिट्टी की नमी बनाए रखें।
-            आज हल्की बारिश की संभावना है ☁️  
-            इसलिए फसलों की सिंचाई को थोड़ा टाल दें और मिट्टी की नमी बनाए रखें।
-            आज हल्की बारिश की संभावना है ☁️  
-            इसलिए फसलों की सिंचाई को थोड़ा टाल दें और मिट्टी की नमी बनाए रखें।
-            आज हल्की बारिश की संभावना है ☁️  
-            इसलिए फसलों की सिंचाई को थोड़ा टाल दें और मिट्टी की नमी बनाए रखें।
+            {advice}
           </Text>
         </View>
       </View>
 
-      <TouchableOpacity style={styles.refreshBtn}>
-        <Ionicons name="heart-outline" size={24} color="#fff" />
-        <Text style={styles.refreshText}>Developed By Shubham.</Text>
+      <TouchableOpacity style={styles.refreshBtn} onPress={onClick}>
+        <Ionicons name="volume-high-outline" size={24} color="#fff" />
+        <Text style={styles.refreshText}>Hear the expert advice.</Text>
       </TouchableOpacity>
     </View>
   );

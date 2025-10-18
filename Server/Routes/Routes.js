@@ -1,40 +1,55 @@
-const express = require('express');
+const express = require("express");
 const Router = express.Router();
 
-const {signup, login, getAllUsers, getUserDetails, updateUser, deleteUser} = require('../Controllers/UserController')
+const {
+  signup,
+  login,
+  getAllUsers,
+  getUserDetails,
+  updateUser,
+  deleteUser,
+} = require("../Controllers/userController");
 
+const {
+  addSoilData,
+  getSoilData,
+  getSoilDataByUserId,
+  deleteSoilData,
+  updateSoilData,
+} = require("../Controllers/soilDataController");
+
+const { getChatHistoryByUserId, addChatHistory, deleteChatHistoryById } = require("../Controllers/chatHistoryController");
+
+const {addFeedback, deleteFeedback, getAllFeedback} = require('../Controllers/FeedbackController')
 
 //user routes
-Router.post('/signup', signup);
-Router.post('/login', login);
-Router.get('/getallusers', getAllUsers);
-Router.get('/getuser/:id', getUserDetails);
-Router.put('/updateuser/:id', updateUser);
-Router.delete('/deleteuser/:id', deleteUser);
-
+Router.post("/signup", signup);
+Router.post("/login", login);
+Router.get("/getallusers", getAllUsers);
+Router.get("/getuser/:id", getUserDetails);
+Router.put("/updateuser/:id", updateUser);
+Router.delete("/deleteuser/:id", deleteUser);
 
 //Soil routes
-Router.post('/soil/add')
-Router.get('/soil/get')
-Router.get('/soil/get/:id')
-Router.delete('/soil/delete/:id')
-Router.put('/soil/update/:id')
+Router.post("/soil/add", addSoilData);
+Router.get("/soil/get", getSoilData);
+Router.get("/soil/get/user/:id", getSoilDataByUserId);
+Router.delete("/soil/delete/:id", deleteSoilData);
+Router.patch("/soil/update/:id", updateSoilData);
 
 //chatHistory routes
-Router.post('/chat/add')
-Router.get('/chat/get/:id')
-Router.delete('/chat/delete/:id')
-
+Router.post("/chat/add", addChatHistory);
+Router.get("/chat/get/user/:id", getChatHistoryByUserId);
+Router.delete("/chat/delete/:id", deleteChatHistoryById);
 
 //pest routes
-Router.post('/pest/add')
-Router.get('/pest/get')
-Router.delete('/pest/delete/:id')
-
+Router.post("/pest/add");
+Router.get("/pest/get");
+Router.delete("/pest/delete/:id");
 
 //Feedback routes
-Router.post('/feedback/add')
-Router.get('/feedback/get')
-Router.delete('/feedback/delete/:id')
+Router.post("/feedback/add", addFeedback);
+Router.get("/feedback/get", getAllFeedback);
+Router.delete("/feedback/delete/:id", deleteFeedback);
 
 module.exports = Router;

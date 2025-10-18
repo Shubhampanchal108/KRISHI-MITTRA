@@ -13,79 +13,102 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import NavigationTab from "../src/components/NavigationTab";
 import HeaderTab from "../src/components/HeaderTab";
-
+import { LLM } from "../src/services/LLM";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { URL } from "../App";
+import axios from "axios";
+import { errorMsg } from "../src/utils/Notification";
 
 const Chatbot = () => {
+  const flatListRef = React.useRef();
+
   const [messages, setMessages] = useState([
-    { id: 1, text: "👋 Namaste! Main AgriMate hoon — aapki kheti saathi.", sender: "bot" },
+    { id: 1, text: "👋 Hi I am Krishi-Mittra aapka kheti saathi.", sender: "bot" },
   ]);
   const [input, setInput] = useState("");
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
     const newMsg = { id: Date.now(), text: input, sender: "user" };
     setMessages([...messages, newMsg]);
 
-    // TODO: Add AI logic here
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now() + 1, text: "Yeh acha sawal hai! Main check karta hoon... 🌱", sender: "bot" },
-      ]);
-    }, 700);
+    const data = await LLM(input);
+
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now() + 1, text: data, sender: "bot" },
+    ]);
     setInput("");
+
+    try {
+      const payload = {
+        userId: await AsyncStorage.getItem("userId"),
+        query: input,
+        response: data,
+      };
+      const result = await axios.post(`${URL}/api/main/chat/add`, payload);
+      if (result.data) console.log("History Saved.");
+    } catch (error) {
+      console.log(error);
+      errorMsg("Internal server error");
+    }
   };
 
   return (
     <>
-    <HeaderTab/>
-    <SafeAreaView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+      <HeaderTab />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+      >
+        <SafeAreaView style={styles.container}>
+          {/* Messages */}
+          <FlatList
+            ref={flatListRef}
+            onContentSizeChange={() => flatListRef.current.scrollToEnd({ animated: true })}
+            onLayout={() => flatListRef.current.scrollToEnd({ animated: true })}
+            data={messages}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <View
+                style={[
+                  styles.messageBubble,
+                  item.sender === "user" ? styles.userBubble : styles.botBubble,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.messageText,
+                    item.sender === "user" ? styles.userText : styles.botText,
+                  ]}
+                >
+                  {item.text}
+                </Text>
+              </View>
+            )}
+            contentContainerStyle={{ padding: 15 }}
+          />
 
-      {/* Messages */}
-      <FlatList
-        data={messages}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View
-            style={[
-              styles.messageBubble,
-              item.sender === "user" ? styles.userBubble : styles.botBubble,
-            ]}
-          >
-            <Text
-              style={[
-                styles.messageText,
-                item.sender === "user" ? styles.userText : styles.botText,
-              ]}
-            >
-              {item.text}
-            </Text>
+          {/* Input Area */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Ask anything about your crops..."
+              placeholderTextColor="#777"
+              value={input}
+              onChangeText={setInput}
+            />
+            <TouchableOpacity style={styles.micButton}>
+              <Ionicons name="mic-outline" size={24} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+              <Ionicons name="send" size={22} color="white" />
+            </TouchableOpacity>
           </View>
-        )}
-        contentContainerStyle={{ padding: 15 }}
-      />
-
-      {/* Input Area */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Ask anything about your crops..."
-          placeholderTextColor="#777"
-          value={input}
-          onChangeText={setInput}
-        />
-        <TouchableOpacity style={styles.micButton}>
-          <Ionicons name="mic-outline" size={24} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-          <Ionicons name="send" size={22} color="white" />
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-    <NavigationTab/>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+      <NavigationTab />
     </>
   );
 };
@@ -94,9 +117,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#e0ebe0ff",
-    marginBottom: 10,
-    width: '100%',
-    height: '100%'
+    width: "100%",
+    height: "100%",
   },
   messageBubble: {
     maxWidth: "80%",
@@ -131,7 +153,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     backgroundColor: "#93df93ff",
-    marginBottom: -54,
+    marginBottom: -44,
   },
   input: {
     flex: 1,

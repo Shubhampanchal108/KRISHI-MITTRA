@@ -7,12 +7,11 @@ const Routes = require('./Routes/Routes')
 
 
 //Cors
-app.use(cors(
-  {
-    origin: '*',
-    methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
-  }
-))
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 //PORT
 const PORT = process.env.PORT || 3000;

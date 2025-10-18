@@ -1,43 +1,89 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import NavigantionTab from '../src/components/NavigationTab'
 import HeaderTab from "../src/components/HeaderTab";
 import AIAdviceCard from "../src/components/AIAdvise";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getWeatherInfo } from "../src/services/Weather";
+import { WeatherLLM } from "../src/services/LLM";
+import {speak} from '../src/utils/TTS'
 
 export default function WeatherScreen() {
+  const [weatherData, setWeatherData] = useState(null);
+  const [advice, setAdvice] = useState('');
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      const data = await AsyncStorage.getItem("weatherData");
+      if (data) {
+        setWeatherData(JSON.parse(data));
+        return;
+      }
+      setWeatherData(data);
+    };
+
+    fetchWeather();
+  }, []);
+
+  useEffect(() => {
+    if (weatherData) {
+      const weatherInfo = `Temperature: ${Math.floor(weatherData.main?.temp - 273.15)}°C, Weather: ${weatherData.weather[0]?.description}, Humidity: ${weatherData.main?.humidity}%, Wind Speed: ${weatherData.wind?.speed} mph`;
+
+      const fetchAdvice = async () => {
+        const fetchedOnce = await AsyncStorage.getItem("sprayingAdviceFetched");
+        if (fetchedOnce === "true") {
+          setAdvice(await AsyncStorage.getItem("sprayingAdvice"));
+          return;
+        };
+
+        try {
+          const response = await WeatherLLM(`give me spraying advice according to this data ${weatherInfo}`);
+          setAdvice(response);
+          await AsyncStorage.setItem("sprayingAdvice", response);
+          await AsyncStorage.setItem("sprayingAdviceFetched", "true");
+          speak(response);
+        } catch (error) {
+          console.error("Error fetching advice:", error);
+        }
+      };
+
+      fetchAdvice();
+    }
+  }, [weatherData]);
+
   return (
     <>
-    <HeaderTab/>
-    <ScrollView style={styles.container}>
-
-    {/* Current Weather */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Current Weather in Kaithal</Text>
-        <View style={styles.tempRow}>
+      <HeaderTab />
+      <ScrollView style={styles.container}>
+        {/* Current Weather */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Current Weather in {weatherData?.name}</Text>
+          <View style={styles.tempRow}>
           <Ionicons name="sunny-outline" size={28} color="#007AFF" />
-          <Text style={styles.tempText}>29.5°C</Text>
+          <Text style={styles.tempText}>{Math.floor(weatherData?.main?.temp - 273.15)}°C</Text>
         </View>
-        <Text style={styles.subHeading}>CLEAR SKY</Text>
+        <Text style={styles.subHeading}>{weatherData?.weather[0]?.description}</Text>
 
         {/* Current Conditions */}
         <Text style={styles.sectionTitle}>Current Conditions</Text>
         <View style={styles.grid}>
           <View style={styles.gridItem}>
             <Ionicons name="thermometer-outline" size={20} color="#007AFF" />
-            <Text>Feels Like: 28.9°C</Text>
+            <Text>Feels Like: {Math.floor(weatherData?.main?.feels_like - 273.15)}°C</Text>
           </View>
           <View style={styles.gridItem}>
             <Ionicons name="water-outline" size={20} color="#007AFF" />
-            <Text>Humidity: 38%</Text>
+            <Text>Humidity: {weatherData?.main?.humidity}%</Text>
           </View>
           <View style={styles.gridItem}>
             <Ionicons name="navigate-outline" size={20} color="#007AFF" />
-            <Text>Wind: 11.3 km/h</Text>
+            <Text>Wind: {Math.floor(weatherData?.wind?.speed * 3.6)} km/h</Text>
           </View>
           <View style={styles.gridItem}>
             <Ionicons name="speedometer-outline" size={20} color="#007AFF" />
-            <Text>Pressure: 1012 hPa</Text>
+            <Text>Pressure: {weatherData?.main?.pressure} hPa</Text>
           </View>
         </View>
 
@@ -46,35 +92,39 @@ export default function WeatherScreen() {
         <View style={styles.grid}>
           <View style={styles.gridItem}>
             <Ionicons name="rainy-outline" size={20} color="#007AFF" />
-            <Text>Rain (1h): 0.0 mm</Text>
+            <Text>Rain (1h): {weatherData?.rain?.['1h'] || 0} mm</Text>
           </View>
           <View style={styles.gridItem}>
             <Ionicons name="snow-outline" size={20} color="#007AFF" />
-            <Text>Snow (1h): 0.0 mm</Text>
+            <Text>Snow (1h): {weatherData?.snow?.['1h'] || 0} mm</Text>
           </View>
         </View>
       </View>
 
       {/* Tabs */}
       <View style={styles.tabs}>
-        <Text style={styles.tabInactive}>Fertilizers</Text>
-        <Text style={styles.tabActive}>Spraying</Text>
+        <TouchableOpacity style={styles.tabInactive}>
+          <Text style={styles.tabInactive}>Fertilizers</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabActive}>
+          <Text style={styles.tabActive}>Spraying</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Current Spraying Status */}
+      {/* Current Conditions Status */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Current Spraying Status</Text>
+        <Text style={styles.cardTitle}>Current Conditions</Text>
 
-        <View style={styles.statusRow}>
+        {/* <View style={styles.statusRow}>
           <Ionicons name="warning-outline" size={20} color="#F7B500" />
           <Text style={styles.statusText}>Acceptable</Text>
-        </View>
+        </View> */}
 
         <View style={styles.infoList}>
-          <Text style={styles.infoItem}>✅ Temperature: 29.5°C</Text>
-          <Text style={styles.infoItem}>✅ Wind Speed: 11.3 km/h</Text>
-          <Text style={styles.infoItem}>❌ Humidity: 38%</Text>
-          <Text style={styles.infoItem}>✅ Rain Probability: 19%</Text>
+          <Text style={styles.infoItem}>Temperature: {Math.floor(weatherData?.main?.temp - 273.15)}°C</Text>
+          <Text style={styles.infoItem}>Wind Speed: {Math.floor(weatherData?.wind?.speed * 3.6)} km/h</Text>
+          <Text style={styles.infoItem}>Humidity: {weatherData?.main?.humidity}%</Text>
+          <Text style={styles.infoItem}>Rain Probability: {weatherData?.rain?.['1h'] || 0}%</Text>
         </View>
       </View>
 
@@ -85,15 +135,15 @@ export default function WeatherScreen() {
         <Text style={styles.cardTitle}>Optimal Conditions</Text>
 
         <View style={styles.statusRow}>
-          <Ionicons name="warning-outline" size={20} color="#F7B500" />
-          <Text style={styles.statusText}>Acceptable</Text>
+          <Ionicons name="checkmark-circle-outline" size={20} color="#16be16ff" />
+          <Text style={[styles.statusText, { color: "#16c716ff" }]}>Best Conditions</Text>
         </View>
 
         <View style={styles.infoList}>
-          <Text style={styles.infoItem}>✅ Temperature: 29.5°C</Text>
-          <Text style={styles.infoItem}>✅ Wind Speed: 11.3 km/h</Text>
-          <Text style={styles.infoItem}>❌ Humidity: 38%</Text>
-          <Text style={styles.infoItem}>✅ Rain Probability: 19%</Text>
+          <Text style={styles.infoItem}>✅ Temperature: 20–28°C</Text>
+          <Text style={styles.infoItem}>✅ Wind Speed: 0–15 km/h</Text>
+          <Text style={styles.infoItem}>✅ Humidity: 40–60%</Text>
+          <Text style={styles.infoItem}>✅ Rain Probability: 1-20%</Text>
         </View>
       </View>
 
@@ -102,15 +152,15 @@ export default function WeatherScreen() {
         <Text style={styles.cardTitle}>Avoid Spraying</Text>
 
         <View style={styles.statusRow}>
-          <Ionicons name="warning-outline" size={20} color="#F7B500" />
-          <Text style={styles.statusText}>Acceptable</Text>
+          <Ionicons name="warning-outline" size={20} color="#f70400ff" />
+          <Text style={[styles.statusText, { color: "#f70400ff" }]}>Avoid</Text>
         </View>
 
         <View style={styles.infoList}>
-          <Text style={styles.infoItem}>✅ Temperature: 29.5°C</Text>
-          <Text style={styles.infoItem}>✅ Wind Speed: 11.3 km/h</Text>
-          <Text style={styles.infoItem}>❌ Humidity: 38%</Text>
-          <Text style={styles.infoItem}>✅ Rain Probability: 19%</Text>
+          <Text style={styles.infoItem}>❌ Temperature: 40°C and  4°C</Text>
+          <Text style={styles.infoItem}>❌ Wind Speed: 25-30 km/h</Text>
+          <Text style={styles.infoItem}>❌ Humidity: 70%</Text>
+          <Text style={styles.infoItem}>❌ Rain Probability: 60-100%</Text>
         </View>
       </View>
 
@@ -122,9 +172,9 @@ export default function WeatherScreen() {
           Consider using drift reduction additives and larger droplet sizes.
         </Text>
       </View> */}
-      
-      <View style={styles.Advise}><AIAdviceCard/></View>
-      
+
+      <View style={styles.Advise}><AIAdviceCard title="Today's Spraying Advice" advice={advice} onClick={() => speak(advice)}/></View>
+
     </ScrollView>
     <NavigantionTab/>
     </>

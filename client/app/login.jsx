@@ -6,24 +6,58 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   StatusBar,
 } from 'react-native';
 
+import axios from 'axios';
+import {URL} from '@/App';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import Toast from 'react-native-toast-message';
+import { successMsg, errorMsg } from '../src/utils/Notification';
+
+
 const Login = () => {
-  // State variables to hold the email and password
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
 
+  const Router = useRouter();
+
   // Function to handle the login button press
-  const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password.');
-      return;
+    const handleLogin = async () => {
+  if (!phone || !password) {
+    errorMsg("Please fill all fields!");
+    return;
+  }
+
+  try {
+    const data = {phone, password}
+    const response = await axios.post(`${URL}/api/main/login`, data);
+
+    if (response.data) {
+      successMsg("Login successfully.");
+
+      setPhone("");
+      setPassword("");
+
+      AsyncStorage.setItem('token', response.data.token);
+      AsyncStorage.setItem('name', response.data.user.name);
+      AsyncStorage.setItem('userId', response.data.user._id);
+      AsyncStorage.setItem('phone', response.data.user.phone);
+      AsyncStorage.setItem('state', response.data.user.state);
+      AsyncStorage.setItem('district', response.data.user.district);
+
+      setTimeout(() => {
+        Router.push('/Home')
+      }, 2000);
+
     }
-    console.log('Attempting login with:', { email, password });
-    Alert.alert('Success', `Logged in as ${email}`);
-  };
+  } catch (e) {
+    const msg = e.response?.data?.message || "Internal Server Error.";
+    errorMsg(msg);
+    console.log(e);
+  }
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -32,13 +66,13 @@ const Login = () => {
         <Text style={styles.title}>Welcome Back! 👋</Text>
         <Text style={styles.subtitle}>Sign in to continue</Text>
 
-        {/* Email Input */}
+        {/* Phone Input */}
         <TextInput
           style={styles.input}
           placeholder="phone no"
           placeholderTextColor="#888"
-          value={email}
-          onChangeText={setEmail}
+          value={phone}
+          onChangeText={setPhone}
           keyboardType="phone-pad"
           autoCapitalize="none"
           autoCorrect={false}
@@ -62,11 +96,12 @@ const Login = () => {
         {/* Sign Up Link */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => Alert.alert('Navigate', 'Go to Sign Up screen')}>
+          <TouchableOpacity onPress={() => Router.push('/signUp')}>
             <Text style={styles.signupText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
       </View>
+      <Toast/>
     </SafeAreaView>
   );
 };
