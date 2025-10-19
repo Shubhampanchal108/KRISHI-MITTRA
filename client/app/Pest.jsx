@@ -1,24 +1,45 @@
-import React from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Image, Alert } from "react-native";
+import React, { useEffect } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  Image,
+  Alert,
+  TextInput,
+} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import HeaderTab from "../src/components/HeaderTab";
 import NavigationTab from "../src/components/NavigationTab";
 import AIAdviceCard from "@/src/components/AIAdvise";
+import axios from 'axios'
+import {URL} from '../App'
+import {speak} from '../src/utils/TTS'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Pest = () => {
   const [imageUrl, setImageUrl] = React.useState(null);
+  const [question, setQuestion] = React.useState("");
+  const [advice, setAdvice] = React.useState('')
+
+  useEffect(()=>{
+    const mangeAdviceState = async()=>{
+      const data = await AsyncStorage.getItem("pestAdvice")
+      if(data){
+        setAdvice(data)
+      }
+    } 
+    mangeAdviceState()
+  },[])
 
   // Function for choosing image
   const pickImage = async () => {
-    Alert.alert(
-      "Select Option",
-      "Choose image source",
-      [
-        { text: "📷 Camera", onPress: () => openCamera() },
-        { text: "🖼️ Gallery", onPress: () => openGallery() },
-        { text: "Cancel", style: "cancel" },
-      ]
-    );
+    Alert.alert("Select Option", "Choose image source", [
+      { text: "📷 Camera", onPress: () => openCamera() },
+      { text: "🖼️ Gallery", onPress: () => openGallery() },
+      { text: "Cancel", style: "cancel" },
+    ]);
   };
 
   // Open Camera
@@ -58,32 +79,98 @@ const Pest = () => {
     }
   };
 
+  //Handle Send 
+  const HandleSend = async () => {
+  try {
+    if (!imageUrl || !question) {
+      console.log("Please provide both image and query");
+      return;
+    }
+
+    const data = new FormData();
+    data.append("query", question);
+    data.append("image", {
+      uri: imageUrl,               // ✅ full URI (like file:///...)
+      name: "pest_image.jpg",      // ✅ name required
+      type: "image/jpeg",          // ✅ type required
+    });
+
+    const response = await axios.post(`${URL}/api/main/pestdetection`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (response.data) {
+      setAdvice(response.data.response)
+      AsyncStorage.setItem("pestAdvice", response.data.response)
+      setQuestion('')
+    } else {
+      console.log("No runned");
+    }
+  } catch (error) {
+    setQuestion('')
+    console.error("Upload error:", error.message);
+  }
+};
+
   return (
     <>
       <HeaderTab />
 
-
       <ScrollView>
-      {/* Show Selected Image */}
-      {imageUrl && (
-        <Image
-          source={{ uri: imageUrl }}
-          style={styles.previewImage}
-        />
-      )}
+        <Text
+          style={[
+            styles.adviceTitle,
+            { marginHorizontal: 12, marginTop: 12, fontSize: 20 },
+          ]}
+        >
+          Detect Pests and Diseases
+        </Text>
+
+        {/* Show Selected Image */}
+        {imageUrl && (
+          <Image source={{ uri: imageUrl }} style={styles.previewImage} />
+        )}
+        {!imageUrl && (
+          <Image
+            source={require("../assets/images/default.webp")}
+            style={styles.previewImage}
+          />
+        )}
+
+        <View style={styles.inputCont}>
+          <TextInput
+            style={styles.input}
+            placeholder="Ask question about image"
+            placeholderTextColor="#888"
+            value={question}
+            onChangeText={setQuestion}
+          />
+        </View>
         <View style={styles.adviceContainer}>
-          <Text style={styles.adviceTitle}>Detect Pests and Diseases</Text>
+          {/* <Text style={styles.adviceTitle}>Detect Pests and Diseases</Text> */}
           <Text style={styles.adviceSubtitle}>
-            Upload or click an image to detect pest/disease and get instant advice.
+            Upload or click an image to detect pest/disease and get instant
+            advice.
           </Text>
 
           <TouchableOpacity style={styles.adviceButton} onPress={pickImage}>
             <Text style={styles.adviceButtonText}>📷 Upload Image</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.adviceButton} onPress={HandleSend}>
+            <Text style={styles.adviceButtonText} >Send</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.adviceCard}>
-          <AIAdviceCard title="Advice based on image" secondTitle="Our Advice" advice='fdklsajjjjjjjjjjjjjjjjjj;;;;;;;;;;;;;;;;;;;;;;;;;;'  />
+          <AIAdviceCard
+            title="Advice based on image"
+            secondTitle="Model Advice"
+            advice={advice}
+            onClick={()=>speak(advice)}
+          />
         </View>
       </ScrollView>
 
@@ -102,6 +189,28 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderRadius: 10,
     resizeMode: "cover",
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderStyle: "dotted",
+    elevation: 2,
+  },
+  inputCont: {
+    padding: 13,
+    backgroundColor: "#F0FAF3",
+    borderRadius: 8,
+    marginHorizontal: 13,
+    marginVertical: 10,
+    elevation: 2,
+  },
+  input: {
+    height: 50,
+    backgroundColor: 'white',
+    borderColor: '#555',
+    borderWidth: 1,
+    borderRadius: 8,
+    fontSize: 16,
+    paddingHorizontal: 10,
+    color: '#000',
   },
   adviceCard: {
     margin: 13,
@@ -110,7 +219,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0FAF3",
     borderRadius: 16,
     padding: 20,
-    marginTop: 20,
+    marginTop: 5,
     marginHorizontal: 12,
     borderWidth: 1,
     borderColor: "#C8E6C9",
@@ -136,6 +245,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
+    margin: 3,
   },
   adviceButtonText: {
     color: "#fff",

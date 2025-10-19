@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { URL } from "../App";
 import axios from "axios";
 import { errorMsg } from "../src/utils/Notification";
+import {speak} from "../src/utils/TTS"
 
 const Chatbot = () => {
   const flatListRef = React.useRef();
@@ -27,7 +28,36 @@ const Chatbot = () => {
   ]);
   const [input, setInput] = useState("");
 
+  const convertGeminiToMessages = (geminiHistory) => {
+    return geminiHistory.map((item, index) => ({
+      id: index + 1,
+      text: item.parts?.[0]?.text || "",
+      sender: item.role === "user" ? "user" : "bot",
+    }));
+  };
+
+  useEffect(()=>{
+    const loadChats = async()=>{
+      try {
+        const storedHistory = await AsyncStorage.getItem("chatHistory");
+
+        if (storedHistory) {
+          const parsedHistory = JSON.parse(storedHistory);
+          console.log(parsedHistory)
+          if (parsedHistory.length > 0) {
+            const converted = convertGeminiToMessages(parsedHistory);
+            setMessages(converted);
+          }
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    loadChats();
+  }, [])
+
   const handleSend = async () => {
+
     if (!input.trim()) return;
     const newMsg = { id: Date.now(), text: input, sender: "user" };
     setMessages([...messages, newMsg]);
@@ -48,6 +78,7 @@ const Chatbot = () => {
       };
       const result = await axios.post(`${URL}/api/main/chat/add`, payload);
       if (result.data) console.log("History Saved.");
+      speak(data)
     } catch (error) {
       console.log(error);
       errorMsg("Internal server error");
@@ -71,6 +102,7 @@ const Chatbot = () => {
             data={messages}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
+              <TouchableOpacity activeOpacity={0.9} onPress={()=>speak(item.text)}>
               <View
                 style={[
                   styles.messageBubble,
@@ -86,6 +118,7 @@ const Chatbot = () => {
                   {item.text}
                 </Text>
               </View>
+              </TouchableOpacity>
             )}
             contentContainerStyle={{ padding: 15 }}
           />

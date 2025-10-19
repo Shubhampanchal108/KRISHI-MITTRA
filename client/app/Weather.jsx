@@ -6,13 +6,13 @@ import HeaderTab from "../src/components/HeaderTab";
 import AIAdviceCard from "../src/components/AIAdvise";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getWeatherInfo } from "../src/services/Weather";
 import { WeatherLLM } from "../src/services/LLM";
 import {speak} from '../src/utils/TTS'
 
 export default function WeatherScreen() {
   const [weatherData, setWeatherData] = useState(null);
   const [advice, setAdvice] = useState('');
+  const [activeTab, setActiveTab] = useState('spraying');
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -103,22 +103,16 @@ export default function WeatherScreen() {
 
       {/* Tabs */}
       <View style={styles.tabs}>
-        <TouchableOpacity style={styles.tabInactive}>
-          <Text style={styles.tabInactive}>Fertilizers</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabActive}>
-          <Text style={styles.tabActive}>Spraying</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={() => setActiveTab('spraying')}>
+            <Text style={activeTab === 'spraying' ? styles.tabActive : styles.tabInactive}>Spraying Advice</Text>
+          </TouchableOpacity>
+        </View>
 
+      {activeTab === 'spraying' && (
+        <>
       {/* Current Conditions Status */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Current Conditions</Text>
-
-        {/* <View style={styles.statusRow}>
-          <Ionicons name="warning-outline" size={20} color="#F7B500" />
-          <Text style={styles.statusText}>Acceptable</Text>
-        </View> */}
 
         <View style={styles.infoList}>
           <Text style={styles.infoItem}>Temperature: {Math.floor(weatherData?.main?.temp - 273.15)}°C</Text>
@@ -164,16 +158,13 @@ export default function WeatherScreen() {
         </View>
       </View>
 
-    {/* Recommendations */}
-      {/* <View style={styles.card}>
-        <Text style={styles.cardTitle}>Recommendations</Text>
-        <Text style={styles.subHeading}>💧 Humidity too low</Text>
-        <Text style={styles.description}>
-          Consider using drift reduction additives and larger droplet sizes.
-        </Text>
-      </View> */}
-
       <View style={styles.Advise}><AIAdviceCard title="Today's Spraying Advice" advice={advice} onClick={() => speak(advice)}/></View>
+      </>
+      )}
+
+      {activeTab === 'fertilizers' && (
+        <View style={styles.Advise}><AIAdviceCard title="Today's Fertilizer Advice" advice="Fertilizer advice feature coming soon!" onClick={() => speak("Fertilizer advice feature coming soon!")}/></View>
+      )}
 
     </ScrollView>
     <NavigantionTab/>
@@ -209,9 +200,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
+    paddingHorizontal: 10,
   },
   tabActive: {
-    color: "#007AFF",
+    color: "#4CAF50",
     fontWeight: "bold",
     fontSize: 16,
   },

@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Welcome from "./app/Welcome";
 import { useRouter } from "expo-router";
 
-export const URL = 'http://192.168.31.174:5000';
+export const URL = 'http://192.168.43.172:5000';
 
 const App = () => {
   const router = useRouter();
@@ -17,13 +17,15 @@ const App = () => {
       AsyncStorage.setItem("weatherFetched", "false");
       AsyncStorage.setItem("adviceFetched", "false");
       AsyncStorage.setItem("sprayingAdviceFetched", "false");
+      AsyncStorage.removeItem("chatHistory");
+      AsyncStorage.removeItem("pestAdvice")
 
       if (!token && !user) {
-        setTimeout(() => router.replace("/signUp"), 1000);
+        setTimeout(() => router.replace("/signUp"), 3000);
       } else if (!token) {
-        setTimeout(() => router.replace("/login"), 1000);
+        setTimeout(() => router.replace("/login"), 3000);
       } else {
-        setTimeout(() => router.replace("/Home"), 1000);
+        setTimeout(() => router.replace("/Home"), 3000);
       }
     };
 

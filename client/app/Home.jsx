@@ -95,7 +95,7 @@ return (
         </View>
 
         {/* Weather Card */}
-        <View style={styles.weatherCard}>
+        <TouchableOpacity style={styles.weatherCard} onPress={()=>Router.push("/Weather")}>
           <View style={styles.weatherRow}>
             <Ionicons name="partly-sunny-outline" size={40} color="#FFD54F" />
             <View style={{ marginLeft: 10 }}>
@@ -103,7 +103,7 @@ return (
               <Text style={styles.weatherText}>{weatherData?.weather[0]?.description} | {weatherData?.name}</Text>
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.adviceContainer}>
           <Text style={styles.adviceTitle}>Detect Pests and Dieases</Text>

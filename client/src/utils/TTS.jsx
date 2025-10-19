@@ -11,6 +11,6 @@ export const speak = (responseText) => {
   Speech.speak(responseText, {
     language: lang, // auto detect based on unicode
     pitch: 1.0,
-    rate: 0.8
+    rate: 0.7
   });
 };

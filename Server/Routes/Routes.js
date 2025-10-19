@@ -18,6 +18,10 @@ const {
   updateSoilData,
 } = require("../Controllers/soilDataController");
 
+const upload = require('../Middlewares/Multer')
+
+const {pestDetection} = require('../Controllers/LLM_Controllers')
+
 const { getChatHistoryByUserId, addChatHistory, deleteChatHistoryById } = require("../Controllers/chatHistoryController");
 
 const {addFeedback, deleteFeedback, getAllFeedback} = require('../Controllers/FeedbackController')
@@ -46,6 +50,9 @@ Router.delete("/chat/delete/:id", deleteChatHistoryById);
 Router.post("/pest/add");
 Router.get("/pest/get");
 Router.delete("/pest/delete/:id");
+
+//LLM Routes
+Router.post('/pestdetection', upload.single("image"), pestDetection)
 
 //Feedback routes
 Router.post("/feedback/add", addFeedback);
