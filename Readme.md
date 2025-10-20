@@ -73,13 +73,13 @@ It empowers farmers by offering soil health analysis, fertilizer guidance, pest 
 * 🌾 AI-powered yield prediction.
 * 🗣️ Offline voice assistant for remote areas.
 * 🌐 Blockchain-based crop traceability.
-* 🤝 Farmer-to-expert live consultation system.
+* 🤝 Farmer-to-expert live consultation system
 
 ---
 
 ## 💡 Vision
 
-Krishi-Mittra aims to **bridge the gap between AI and agriculture**, helping every farmer — from local fields to global markets — make smarter, data-driven farming decisions.
+Krishi-Mittra aims to **bridge the gap between AI and agriculture**, helping every farmer — from local fields to global markets — make smarter, data-driven farming decision
 
 ---
 
