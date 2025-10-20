@@ -8,6 +8,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,6 +23,7 @@ import {speak} from "../src/utils/TTS"
 
 const Chatbot = () => {
   const flatListRef = React.useRef();
+  const [loading , setLoading] = React.useState(false)
 
   const [messages, setMessages] = useState([
     { id: 1, text: "👋 Hi I am Krishi-Mittra aapka kheti saathi.", sender: "bot" },
@@ -57,18 +59,22 @@ const Chatbot = () => {
   }, [])
 
   const handleSend = async () => {
-
+    
     if (!input.trim()) return;
     const newMsg = { id: Date.now(), text: input, sender: "user" };
     setMessages([...messages, newMsg]);
 
-    const data = await LLM(input);
+    setLoading(true)
+    const query = input;
+    setInput("")
+
+    const data = await LLM(query);
 
     setMessages((prev) => [
       ...prev,
       { id: Date.now() + 1, text: data, sender: "bot" },
     ]);
-    setInput("");
+    setLoading(false)
 
     try {
       const payload = {
@@ -78,7 +84,6 @@ const Chatbot = () => {
       };
       const result = await axios.post(`${URL}/api/main/chat/add`, payload);
       if (result.data) console.log("History Saved.");
-      speak(data)
     } catch (error) {
       console.log(error);
       errorMsg("Internal server error");
@@ -136,7 +141,9 @@ const Chatbot = () => {
               <Ionicons name="mic-outline" size={24} color="white" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-              <Ionicons name="send" size={22} color="white" />
+              {loading ? <ActivityIndicator color="white"/>: <Ionicons name="send" size={22} color="white" />}
+              
+              
             </TouchableOpacity>
           </View>
         </SafeAreaView>

@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Welcome from "./app/Welcome";
 import { useRouter } from "expo-router";
 
-export const URL = 'http://192.168.43.172:5000';
+export const URL = 'http://192.168.31.174:5000';
 
 const App = () => {
   const router = useRouter();

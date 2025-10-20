@@ -1,4 +1,5 @@
-const {PestScanner} = require('../LLM/pestDetection');
+const { PestScanner } = require("../LLM/pestDetection");
+const fs = require("fs");
 
 const pestDetection = async (req, res) => {
   try {
@@ -6,7 +7,9 @@ const pestDetection = async (req, res) => {
     const { query } = req.body;
 
     if (!file || !query) {
-      return res.status(400).json({ error: "Please provide both image and query" });
+      return res
+        .status(400)
+        .json({ error: "Please provide both image and query" });
     }
 
     // Path to uploaded image
@@ -17,6 +20,11 @@ const pestDetection = async (req, res) => {
     if (!response) {
       return res.json({ response: "No result found" });
     }
+
+    // Processing ke baad file delete kar do
+    fs.unlink(imagePath, (err) => {
+      if (err) console.error("Error deleting file:", err);
+    });
 
     return res.json({ response });
   } catch (e) {

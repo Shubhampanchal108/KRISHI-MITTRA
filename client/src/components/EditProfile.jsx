@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 const EditProfileModal = ({ visible, onClose, onSubmit, initialData }) => {
+  console.log(initialData.name)
   const [name, setName] = useState(initialData.name || "");
   const [state, setState] = useState(initialData.state || "");
   const [district, setDistrict] = useState(initialData.district || "");
@@ -34,26 +35,25 @@ const EditProfileModal = ({ visible, onClose, onSubmit, initialData }) => {
             <TextInput
               style={styles.input}
               placeholder="Name"
-              value={name}
+              value={initialData.name}
               onChangeText={setName}
             />
             <TextInput
               style={styles.input}
               placeholder="State"
-              value={state}
+              value={initialData.state}
               onChangeText={setState}
             />
             <TextInput
               style={styles.input}
               placeholder="District"
-              value={district}
+              value={initialData.district}
               onChangeText={setDistrict}
             />
             <TextInput
               style={styles.input}
-              placeholder="Password"
-              secureTextEntry={true}
-              value={password}
+              placeholder="Phone No"
+              value={initialData.phone}
               onChangeText={setPassword}
             />
           </ScrollView>

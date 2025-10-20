@@ -163,8 +163,10 @@ const styles = StyleSheet.create({
   },
   sortRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     marginBottom: 15,
+    width: 140,
+    gap: 10,
   },
   sortButton: {
     flexDirection: 'row',

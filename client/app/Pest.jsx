@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   TextInput,
+  ActivityIndicator
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import HeaderTab from "../src/components/HeaderTab";
@@ -17,11 +18,13 @@ import axios from 'axios'
 import {URL} from '../App'
 import {speak} from '../src/utils/TTS'
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { errorMsg } from "../src/utils/Notification";
 
 const Pest = () => {
   const [imageUrl, setImageUrl] = React.useState(null);
   const [question, setQuestion] = React.useState("");
   const [advice, setAdvice] = React.useState('')
+  const [loading , setLoading] = React.useState(false)
 
   useEffect(()=>{
     const mangeAdviceState = async()=>{
@@ -83,9 +86,10 @@ const Pest = () => {
   const HandleSend = async () => {
   try {
     if (!imageUrl || !question) {
-      console.log("Please provide both image and query");
+      errorMsg("Please provide both image and query");
       return;
     }
+    setLoading(true)
 
     const data = new FormData();
     data.append("query", question);
@@ -105,12 +109,14 @@ const Pest = () => {
       setAdvice(response.data.response)
       AsyncStorage.setItem("pestAdvice", response.data.response)
       setQuestion('')
+      setLoading(false)
     } else {
       console.log("No runned");
     }
   } catch (error) {
     setQuestion('')
     console.error("Upload error:", error.message);
+    setLoading(false)
   }
 };
 
@@ -160,7 +166,9 @@ const Pest = () => {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.adviceButton} onPress={HandleSend}>
-            <Text style={styles.adviceButtonText} >Send</Text>
+            
+            {loading ?(<ActivityIndicator size="large" color="white"/>) : (<Text style={styles.adviceButtonText} >Send</Text>)}
+
           </TouchableOpacity>
         </View>
 
@@ -193,6 +201,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: "dotted",
     elevation: 2,
+    maxWidth: '92%',
   },
   inputCont: {
     padding: 13,

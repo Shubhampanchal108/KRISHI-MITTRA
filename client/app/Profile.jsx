@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons, MaterialIcons, FontAwesome5, FontAwesome } from "@expo/vector-icons";
 import NavTab from '../src/components/NavigationTab'
@@ -15,11 +15,19 @@ const Profile = () => {
 
   const [modalVisible, setModalVisible] = React.useState(false);
   const [editModalVisible, setEditModalVisible] = React.useState(false);
+  const [initialData, setInitalData] = React.useState({})
 
-  const [name, setName] = React.useState(`${AsyncStorage.getItem('name')}`);
-  const [state, setState] = React.useState(`${AsyncStorage.getItem('state')}`);
-  const [district, setDistrict] = React.useState(`${AsyncStorage.getItem('district')}`);
-  const [password, setPassword] = React.useState('');
+  useEffect(()=>{
+    const fetchInitialData = async()=>{
+      setInitalData({
+        name: await AsyncStorage.getItem('name'),
+        state: await AsyncStorage.getItem('state'),
+        district: await AsyncStorage.getItem('district'),
+        phone: await AsyncStorage.getItem("phone")
+      })
+    }
+    fetchInitialData()
+  },[])
 
   const handleLogout = async()=>{
     try {
@@ -111,12 +119,7 @@ const Profile = () => {
             visible={editModalVisible}
             onClose={() => setEditModalVisible(false)}
             onSubmit={(data) => console.log(data)}
-            initialData={{
-              name: AsyncStorage.getItem('name'),
-              state: AsyncStorage.getItem('state'),
-              district: AsyncStorage.getItem('district'),
-              password: AsyncStorage.getItem('password'),
-            }}
+            initialData={initialData}
           />
       </ScrollView>
 

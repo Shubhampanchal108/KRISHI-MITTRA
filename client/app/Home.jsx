@@ -7,128 +7,167 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AgriAISupport from "../src/components/AppServices";
-import Header from '../src/components/HeaderTab'
-import NavigationTab from '../src/components/NavigationTab'
-import AIAdvise from '../src/components/AIAdvise'
+import Header from "../src/components/HeaderTab";
+import NavigationTab from "../src/components/NavigationTab";
+import AIAdvise from "../src/components/AIAdvise";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { WeatherLLM } from "../src/services/LLM";
-import {getWeatherInfo} from '../src/services/Weather'
-import { useRouter } from 'expo-router';
-import {speak} from '../src/utils/TTS'
-
+import { getWeatherInfo } from "../src/services/Weather";
+import { useRouter } from "expo-router";
+import { speak } from "../src/utils/TTS";
 
 const HomeScreen = () => {
-  const Router = useRouter()
+  const Router = useRouter();
   const [weatherData, setWeatherData] = useState(null);
-  const [advice, setAdvice] = useState('')
+  const [advice, setAdvice] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [adviceLoading, setAdviceLoading] = useState(false);
 
   //Display weather
-  const DisplayWeather = async()=>{
-    const City = await AsyncStorage.getItem('district') || 'Delhi'
+  const DisplayWeather = async () => {
+    const City = (await AsyncStorage.getItem("district")) || "Delhi";
 
-    const data = await getWeatherInfo(City)
-    setWeatherData(data)
-    AsyncStorage.setItem('weatherData', JSON.stringify(data));
-  }
-
-  useEffect(() => {
-  const fetchOnce = async () => {
-    const fetched = await AsyncStorage.getItem('weatherFetched');
-    if (fetched === 'true') {
-      setWeatherData(JSON.parse(await AsyncStorage.getItem('weatherData')));
-      console.log("Weather data fetched from storage.");
-      return;
-    }
-
-    await DisplayWeather();
-    await AsyncStorage.setItem('weatherFetched', 'true');
-    console.log("Weather data fetched from API.");
+    const data = await getWeatherInfo(City);
+    setWeatherData(data);
+    AsyncStorage.setItem("weatherData", JSON.stringify(data));
   };
 
-  fetchOnce();
-}, []);
-
-useEffect(() => {
-  if (weatherData) {
-    const weatherInfo = `Temperature: ${Math.floor(weatherData.main?.temp - 273.15)}°C, Weather: ${weatherData.weather[0]?.description}, Humidity: ${weatherData.main?.humidity}%, Wind Speed: ${weatherData.wind?.speed} mph`;
-
-    const fetchAdvice = async () => {
-      const adviceFetched = await AsyncStorage.getItem('adviceFetched');
-
-      if (adviceFetched === 'true') {
-        const storedAdvice = await AsyncStorage.getItem('advice');
-        if (storedAdvice) {
-          setAdvice(storedAdvice);
-          console.log("Advice fetched from storage.");
-          return;
-        }
+  useEffect(() => {
+    const fetchOnce = async () => {
+      setLoading(true);
+      const fetched = await AsyncStorage.getItem("weatherFetched");
+      if (fetched === "true") {
+        setWeatherData(JSON.parse(await AsyncStorage.getItem("weatherData")));
+        console.log("Weather data fetched from storage.");
+        setLoading(false);
+        return;
       }
 
-      try {
-        const response = await WeatherLLM(weatherInfo);
-        setAdvice(response);
-        await AsyncStorage.setItem('advice', response);
-        await AsyncStorage.setItem('adviceFetched', 'true');
-        console.log("Advice fetched from LLM.");
-      } catch (error) {
-        console.error("Error fetching advice:", error);
-      }
+      await DisplayWeather();
+      await AsyncStorage.setItem("weatherFetched", "true");
+      console.log("Weather data fetched from API.");
+      setLoading(false);
     };
 
-    fetchAdvice();
-  }
-}, [weatherData]);
+    fetchOnce();
+  }, []);
 
+  useEffect(() => {
+    if (weatherData) {
+      const weatherInfo = `Temperature: ${Math.floor(
+        weatherData.main?.temp - 273.15
+      )}°C, Weather: ${weatherData.weather[0]?.description}, Humidity: ${
+        weatherData.main?.humidity
+      }%, Wind Speed: ${weatherData.wind?.speed} mph`;
 
-return (
+      setAdviceLoading(true);
+
+      const fetchAdvice = async () => {
+        const adviceFetched = await AsyncStorage.getItem("adviceFetched");
+
+        if (adviceFetched === "true") {
+          const storedAdvice = await AsyncStorage.getItem("advice");
+          if (storedAdvice) {
+            setAdvice(storedAdvice);
+            console.log("Advice fetched from storage.");
+            setAdviceLoading(false);
+            return;
+          }
+        }
+
+        try {
+          const response = await WeatherLLM(weatherInfo);
+          setAdvice(response);
+          await AsyncStorage.setItem("advice", response);
+          await AsyncStorage.setItem("adviceFetched", "true");
+          console.log("Advice fetched from LLM.");
+          setAdviceLoading(false);
+        } catch (error) {
+          setAdviceLoading(false);
+          console.error("Error fetching advice:", error);
+        }
+      };
+
+      fetchAdvice();
+    }
+  }, [weatherData]);
+
+  return (
     <>
-      <Header/>
-    <SafeAreaView style={styles.container}>
-      
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View>
-          <Text style={styles.welcome}>Welcome {AsyncStorage.getItem('name')}</Text>
-        </View>
-
-        {/* Weather Card */}
-        <TouchableOpacity style={styles.weatherCard} onPress={()=>Router.push("/Weather")}>
-          <View style={styles.weatherRow}>
-            <Ionicons name="partly-sunny-outline" size={40} color="#FFD54F" />
-            <View style={{ marginLeft: 10 }}>
-              <Text style={styles.temp}>{Math.floor(weatherData?.main?.temp - 273.15)}°C</Text>
-              <Text style={styles.weatherText}>{weatherData?.weather[0]?.description} | {weatherData?.name}</Text>
-            </View>
+      <Header />
+      <SafeAreaView style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View>
+            <Text style={styles.welcome}>
+              Welcome {AsyncStorage.getItem("name")}
+            </Text>
           </View>
-        </TouchableOpacity>
 
-        <View style={styles.adviceContainer}>
-          <Text style={styles.adviceTitle}>Detect Pests and Dieases</Text>
-          <Text style={styles.adviceSubtitle}>
-            Upload or click an image to detect pest/disease and get instant
-            advice.
-          </Text>
-
+          {/* Weather Card */}
           <TouchableOpacity
-            style={styles.adviceButton}
-            onPress={()=>Router.push("/Pest")}
+            style={styles.weatherCard}
+            onPress={() => Router.push("/Weather")}
           >
-            <Text style={styles.adviceButtonText}>📷 Upload</Text>
+            {!loading ? (
+              <View style={styles.weatherRow}>
+                <Ionicons
+                  name="partly-sunny-outline"
+                  size={40}
+                  color="#FFD54F"
+                />
+                <View style={{ marginLeft: 10 }}>
+                  <Text style={styles.temp}>
+                    {Math.floor(weatherData?.main?.temp - 273.15)}°C
+                  </Text>
+                  <Text style={styles.weatherText}>
+                    {weatherData?.weather[0]?.description} | {weatherData?.name}
+                  </Text>
+                </View>
+              </View>
+            ) : (
+              <ActivityIndicator size="large" color="green" />
+            )}
           </TouchableOpacity>
-        </View>
 
-        {/* Main Content Placeholder */}
-        <AgriAISupport />
+          <View style={styles.adviceContainer}>
+            <Text style={styles.adviceTitle}>Detect Pests and Dieases</Text>
+            <Text style={styles.adviceSubtitle}>
+              Upload or click an image to detect pest/disease and get instant
+              advice.
+            </Text>
 
-        {/* AI  Advise Card */}
-        <AIAdvise title="Today's AI Advice" secondTitle="Weather-based Farming Tip" advice={advice} onClick={()=>speak(advice)}/>
-      </ScrollView>
-    </SafeAreaView>
-      <NavigationTab/>
-      </>
+            <TouchableOpacity
+              style={styles.adviceButton}
+              onPress={() => Router.push("/Pest")}
+            >
+              <Text style={styles.adviceButtonText}>📷 Upload</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Main Content Placeholder */}
+          <AgriAISupport />
+
+          {/* AI  Advise Card */}
+
+          {adviceLoading ? (
+            <ActivityIndicator size="large" color="green" />
+          ) : (
+            <AIAdvise
+              title="Today's AI Advice"
+              secondTitle="Weather-based Farming Tip"
+              advice={advice}
+              onClick={() => speak(advice)}
+            />
+          )}
+        </ScrollView>
+      </SafeAreaView>
+      <NavigationTab />
+    </>
   );
 };
 
@@ -214,7 +253,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 2,
-    height: "220",
+    minHeight: 100,
   },
   adviceTitle: {
     fontSize: 18,

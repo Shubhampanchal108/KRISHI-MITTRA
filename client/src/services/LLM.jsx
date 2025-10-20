@@ -15,6 +15,8 @@ Your tasks include:
 
 Always give only relevant and practical advice to farmers , response should be 80-100 words.
 
+Always respond in hindi language.
+
 Suggesting the best crop to grow based on season and soil type.
 
 Giving step-by-step guidance for sowing, irrigation, fertilizer use, and harvesting.
@@ -55,7 +57,7 @@ export async function LLM(query) {
       message: query,
   });
 
-  const text = response1.text.replace(/[*#@!$%^&()_+={}[\]\\|;:'",.<>/?~-]/g, "")
+  const text = response1.text.replace(/[*#@!$%^&()_+={}[\]\\|;:'"<>/?~-]/g, "")
 
     // Save chat in history
     const newHistory = [...history, { role: "user", parts: [{ text: query }] }, { role: "model", parts: [{ text }] }];
@@ -82,5 +84,5 @@ export async function WeatherLLM(data) {
     },
   });
   console.log(response.text);
-  return response.text.replace(/[*#@!$%^&()_+={}[\]\\|;:'",.<>/?~-]/g, "");
+  return response.text.replace(/[*#@!$%^&()_+={}[\]\\|;:'",<>/?~-]/g, "");
 }

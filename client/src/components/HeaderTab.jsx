@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView , Alert} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 const HeaderTab = () => {
@@ -14,8 +14,8 @@ const HeaderTab = () => {
         <Text style={styles.appName}>Krishi-Mittra</Text>
       </View>
 
-      <TouchableOpacity>
-        <Ionicons name="menu-outline" size={40} color="#1B5E20" />
+      <TouchableOpacity onPress={()=>Alert.alert("Community Feature comming soon.")}>
+        <Ionicons name="people-outline" size={38} color="#1B5E20" />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1.2,
     borderBottomColor: "#A5D6A7",
     width : "100%",
-    paddingHorizontal: 5,
+    paddingHorizontal: 8,
   },
   logoContainer: {
     flexDirection: "row",
