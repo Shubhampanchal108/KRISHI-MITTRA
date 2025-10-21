@@ -145,7 +145,12 @@ const HomeScreen = () => {
               style={styles.adviceButton}
               onPress={() => Router.push("/Pest")}
             >
-              <Text style={styles.adviceButtonText}>📷 Upload</Text>
+                              <Ionicons
+                  name="camera-outline"
+                  size={30}
+                  color="white"
+                />
+              <Text style={styles.adviceButtonText}>Upload</Text>
             </TouchableOpacity>
           </View>
 
@@ -267,10 +272,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   adviceButton: {
+    flexDirection: "row",
     backgroundColor: "#4CAF50",
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
+    justifyContent: "center",
+    gap: 8
   },
   adviceButtonText: {
     color: "#fff",

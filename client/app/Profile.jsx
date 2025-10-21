@@ -75,7 +75,7 @@ const Profile = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Links</Text>
 
-          <TouchableOpacity style={styles.linkItem}>
+          <TouchableOpacity style={styles.linkItem} onPress={()=>Router.push("/Subscriptions")}>
             <Ionicons name="qr-code-outline" size={20} color="#333" />
             <Text style={styles.linkText}>Subscribe</Text>
           </TouchableOpacity>

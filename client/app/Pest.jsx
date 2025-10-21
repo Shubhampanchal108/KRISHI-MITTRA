@@ -11,6 +11,7 @@ import {
   ActivityIndicator
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { Ionicons } from "@expo/vector-icons";
 import HeaderTab from "../src/components/HeaderTab";
 import NavigationTab from "../src/components/NavigationTab";
 import AIAdviceCard from "@/src/components/AIAdvise";
@@ -136,13 +137,20 @@ const Pest = () => {
 
         {/* Show Selected Image */}
         {imageUrl && (
-          <Image source={{ uri: imageUrl }} style={styles.previewImage} />
+          <TouchableOpacity onPress={pickImage}>
+          <Image
+            source={{uri: imageUrl}}
+            style={styles.previewImage}
+          />
+          </TouchableOpacity>
         )}
         {!imageUrl && (
+          <TouchableOpacity onPress={pickImage}>
           <Image
             source={require("../assets/images/default.webp")}
             style={styles.previewImage}
           />
+          </TouchableOpacity>
         )}
 
         <View style={styles.inputCont}>
@@ -162,7 +170,12 @@ const Pest = () => {
           </Text>
 
           <TouchableOpacity style={styles.adviceButton} onPress={pickImage}>
-            <Text style={styles.adviceButtonText}>📷 Upload Image</Text>
+            <Ionicons
+                              name="camera-outline"
+                              size={30}
+                              color="white"
+                            />
+            <Text style={styles.adviceButtonText}>Upload Image</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.adviceButton} onPress={HandleSend}>
@@ -250,10 +263,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   adviceButton: {
+    flexDirection: "row",
+    justifyContent: "center",
     backgroundColor: "#4CAF50",
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
+    gap: 8,
     margin: 3,
   },
   adviceButtonText: {
