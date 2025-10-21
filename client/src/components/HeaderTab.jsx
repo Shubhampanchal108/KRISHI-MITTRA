@@ -15,7 +15,7 @@ const HeaderTab = () => {
       </View>
 
       <TouchableOpacity onPress={()=>Alert.alert("Community Feature comming soon.")}>
-        <Ionicons name="people-outline" size={38} color="#1B5E20" />
+        <Ionicons name="people-outline" size={32} color="#1B5E20" />
       </TouchableOpacity>
     </SafeAreaView>
   );

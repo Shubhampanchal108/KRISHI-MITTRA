@@ -8,6 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import FeedbackModal from "../src/components/Modal";
 import EditProfileModal from "../src/components/EditProfile";
+import SoilDataModal from "../src/components/SoilData";
 
 const Profile = () => {
 
@@ -15,6 +16,7 @@ const Profile = () => {
 
   const [modalVisible, setModalVisible] = React.useState(false);
   const [editModalVisible, setEditModalVisible] = React.useState(false);
+  const [soilModalVisible, setSoilModalVisible] = React.useState(false);
   const [initialData, setInitalData] = React.useState({})
 
   useEffect(()=>{
@@ -93,7 +95,7 @@ const Profile = () => {
             <Text style={styles.linkText}>Feedback</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.linkItem}>
+          <TouchableOpacity style={styles.linkItem} onPress={()=>setSoilModalVisible(true)}>
             <Ionicons name="leaf-outline" size={20} color="#333" />
             <Text style={styles.linkText}>Soil Data</Text>
           </TouchableOpacity>
@@ -120,6 +122,10 @@ const Profile = () => {
             onClose={() => setEditModalVisible(false)}
             onSubmit={(data) => console.log(data)}
             initialData={initialData}
+          />
+          <SoilDataModal
+          visible={soilModalVisible}
+          onClose={() => setSoilModalVisible(false)}
           />
       </ScrollView>
 

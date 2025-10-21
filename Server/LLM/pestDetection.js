@@ -43,23 +43,45 @@ Multiple images mixed with unrelated content
 💬 Maintain tone:
 Always respond in Hindi`
 
+let chatHistory = [];
+
 async function PestScanner(imageUrl, query) {
-  const image = await ai.files.upload({
-    file: imageUrl,
-  });
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    config: {
-      systemInstruction: Instructions
-    },
-    contents: [
-      createUserContent([
+  try {
+    // Upload image
+    const image = await ai.files.upload({
+      file: imageUrl,
+    });
+
+    // Create a chat session with model + past history
+    const chat = await ai.chats.create({
+      model: "gemini-2.5-flash",
+      history: chatHistory,
+      config: {
+        systemInstruction: Instructions,
+      },
+    });
+
+    // Send query with image
+    const response = await chat.sendMessage({
+      message: [
         query,
         createPartFromUri(image.uri, image.mimeType),
-      ]),
-    ],
-  });
-  return response.text.replace(/[*#@!$%^&()_+={}[\]\\|;:'"<>/?~-]/g, "")
+      ],
+    });
+
+    // Clean text response
+    const text = response.text.replace(/[*#@!$%^&()_+={}[\]\\|;:'"<>/?~-]/g, "");
+
+    // Update in-memory chat history
+    chatHistory.push(
+      { role: "user", parts: [{ text: query }] },
+      { role: "model", parts: [{ text }] }
+    );
+    return text;
+  } catch (err) {
+    console.error("Error in PestScanner:", err);
+    return "Sorry, unable to process pest image right now.";
+  }
 }
 
 module.exports = {PestScanner}

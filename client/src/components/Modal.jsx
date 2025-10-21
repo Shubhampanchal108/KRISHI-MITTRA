@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   closeButton: {
-    backgroundColor: "#f44336",
+    backgroundColor: "#999",
     padding: 12,
     borderRadius: 8,
     flex: 1,
