@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
-  SafeAreaView,
-  View,
+  StyleSheet,
   Text,
+  View,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  StatusBar,
-  Image,
+  SafeAreaView,
   ScrollView,
-} from 'react-native';
+  StatusBar,
+  Platform,
+  Image
+} from 'react-native'
+import Feather from 'react-native-vector-icons/Feather'
 import axios from 'axios'
 import Toast from 'react-native-toast-message';
 import { URL } from '@/App';
@@ -17,25 +19,25 @@ import {successMsg, errorMsg} from '../src/utils/Notification'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 
-
-const Signup = () => {
+// --- Main App Component ---
+export default function App() {
   const [name, setName] = useState('');
-  const [mobile, setMobile] = useState('')
+  const [phone, setPhone] = useState('')
   const [state, setState] = useState('')
   const [district, setDistrict] = useState('')
   const [password, setPassword] = useState('');
-  
+
   const Router = useRouter();
   
   //handle signup logic here
   const handleSignup = async () => {
-  if (!name || !mobile || !state || !district || !password) {
+  if (!name || !phone || !state || !district || !password) {
     errorMsg("Please fill all fields!");
     return;
   }
 
   try {
-    const data = {name, phone:mobile, state, district, password}
+    const data = {name, phone, state, district, password}
     const response = await axios.post(`${URL}/api/main/signup`, data);
 
     if (response.data) {
@@ -43,7 +45,7 @@ const Signup = () => {
 
       setName("");
       setPassword("");
-      setMobile("");
+      setPhone("");
       setState("");
       setDistrict("");
 
@@ -66,169 +68,222 @@ const Signup = () => {
   }
 };
 
-
-
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.innerContainer}>
-          {/* App Logo */}
-          {/* <Image
-            source={require('../assets/images/logo.jpeg')}
-            style={styles.logo}
-          /> */}
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled">
+        <View style={styles.container}>
+          <Text style={styles.title}>Krishi Mittra</Text>
+          <Text style={styles.subtitle}>Create your account</Text>
 
-          {/* Title */}
-          <Text style={styles.title}>Create Account 🌿</Text>
-          <Text style={styles.subtitle}>Krishi Mittra || Grow smarter!</Text>
+          {/* Input Fields */}
+          <View style={styles.inputWrapper}>
+            <Feather name="user" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Full Name"
+              placeholderTextColor="#888"
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+            />
+          </View>
 
-          {/* Full Name Input */}
-          <TextInput
-            style={styles.input}
-            placeholder="Name"
-            placeholderTextColor="#6b7280"
-            value={name}
-            onChangeText={setName}
-          />
-
-          {/* Email Input */}
-          <TextInput
-            style={styles.input}
-            placeholder="Mobile"
-            placeholderTextColor="#6b7280"
-            value={mobile}
-            onChangeText={setMobile}
-            keyboardType="phone-pad"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
+          <View style={styles.inputWrapper}>
+            <Feather name="phone" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              placeholderTextColor="#888"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+            />
+          </View>
           
+          {/* In a real app, these would likely be dropdowns/pickers */}
+          <View style={styles.inputWrapper}>
+            <Feather name="map-pin" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="State"
+              placeholderTextColor="#888"
+              value={state}
+              onChangeText={setState}
+            />
+          </View>
 
-          {/* State */}
-          <TextInput
-            style={styles.input}
-            placeholder="State"
-            placeholderTextColor="#6b7280"
-            value={state}
-            onChangeText={setState}
-          />
+          <View style={styles.inputWrapper}>
+            <Feather name="map-pin" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="District"
+              placeholderTextColor="#888"
+              value={district}
+              onChangeText={setDistrict}
+            />
+          </View>
 
-          {/* District */}
-          <TextInput
-            style={styles.input}
-            placeholder="District"
-            placeholderTextColor="#6b7280"
-            value={district}
-            onChangeText={setDistrict}
-          />
+          <View style={styles.inputWrapper}>
+            <Feather name="lock" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#888"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
 
-          {/* Password Input */}
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor="#6b7280"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-
-          {/* Signup Button */}
-          <TouchableOpacity style={styles.button} onPress={handleSignup}>
-            <Text style={styles.buttonText}>Sign Up</Text>
+          {/* Buttons */}
+          <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
+            <Text style={styles.signupButtonText}>Sign Up</Text>
           </TouchableOpacity>
 
-          {/* Footer Link */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => Router.push('/login')}>
-              <Text style={styles.loginText}>Login</Text>
+          <View style={styles.dividerContainer}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <TouchableOpacity style={styles.googleButton}>
+            <Image source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }} style={styles.googleIcon} />
+            <Text style={styles.googleButtonText}>Continue with Google</Text>
+          </TouchableOpacity>
+
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <TouchableOpacity onPress={()=>Router.push("/login")}>
+              <Text style={styles.loginLink}>Log In</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
       <Toast/>
     </SafeAreaView>
-  );
-};
+  )
+}
 
+// --- Styles ---
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: 'white',
   },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    alignItems: 'center',
+    paddingVertical: 20,
+    backgroundColor: "#f6f6f6ff"
   },
-  innerContainer: {
-    backgroundColor: '#ffffff',
+  container: {
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    backgroundColor: '#f6f6f6ff',
     borderRadius: 20,
-    padding: 20,
-    // shadowColor: 'green',
-    // shadowOpacity: 0.1,
-    // shadowRadius: 10,
-    // elevation: 6,
-  },
-  logo: {
-    width: 90,
-    height: 90,
-    alignSelf: 'center',
-    marginBottom: 10,
-    borderRadius: 50,
   },
   title: {
-    fontSize: 23,
+    fontSize: 30,
     fontWeight: 'bold',
-    color: 'green',
-    textAlign: 'center',
+    color: '#2e7d32', // A pleasant green color
+    marginBottom: 8,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'Roboto',
   },
   subtitle: {
-    fontSize: 12,
-    color: '#4b5563',
-    textAlign: 'center',
-    marginBottom: 25,
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ced4da',
+    marginBottom: 15,
+    paddingHorizontal: 15,
+    borderColor: "#a7a0a0ff",
+    borderWidth: 1,
+  },
+  icon: {
+    marginRight: 10,
   },
   input: {
+    flex: 1,
     height: 50,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 10,
-    paddingHorizontal: 15,
     fontSize: 16,
-    color: '#111827',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    marginBottom: 15,
+    color: '#333',
   },
-  button: {
-    backgroundColor: '#16A34A',
-    paddingVertical: 15,
-    borderRadius: 10,
+  signupButton: {
+    width: '100%',
+    backgroundColor: '#4caf50',
+    padding: 13,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 10,
   },
-  buttonText: {
+  signupButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    fontSize: 15,
+    fontWeight: 'bold',
   },
-  footer: {
+  dividerContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginVertical: 15,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#ddd',
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    color: '#888',
+    fontWeight: '600',
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  googleButtonText: {
+    color: '#555',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 10,
+  },
+  loginContainer: {
+    flexDirection: 'row',
     marginTop: 20,
   },
-  footerText: {
-    color: '#6b7280',
+  loginText: {
+    color: '#666',
     fontSize: 14,
   },
-  loginText: {
-    color: '#16A34A',
+  loginLink: {
+    color: '#2e7d32',
     fontSize: 14,
     fontWeight: 'bold',
   },
-});
+  googleIcon: {
+      width: 28,
+      height: 28,
+      // marginRight: 10,
+  },
+})
 
-export default Signup;

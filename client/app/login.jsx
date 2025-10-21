@@ -22,22 +22,13 @@ import Toast from 'react-native-toast-message';
 import Feather from 'react-native-vector-icons/Feather';
 import {URL} from "../App"
 
+
 const successMsg = (message) => {
   Toast.show({ type: 'success', text1: 'Success', text2: message });
 };
 const errorMsg = (message) => {
   Toast.show({ type: 'error', text1: 'Error', text2: message });
 };
-
-// --- App Logo Component ---
-const AppLogo = () => (
-  <View style={styles.logoContainer}>
-    <Image
-      source={require("../assets/images/logo.jpeg")}
-      style={styles.logo}
-    />
-  </View>
-);
 
 const KrishiMittraLoginScreen = () => {
   const [phone, setPhone] = useState('');
@@ -97,7 +88,7 @@ const KrishiMittraLoginScreen = () => {
           {/* --- Header Section --- */}
           <View style={styles.header}>
             {/* <AppLogo /> */}
-            <Text style={styles.title}>कृषि मित्र</Text>
+            <Text style={styles.title}>Krishi Mittra</Text>
             <Text style={styles.subtitle}>Welcome back! Please login to your account.</Text>
           </View>
 
@@ -168,7 +159,7 @@ const KrishiMittraLoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f4f2',
+    backgroundColor: '#f6f6f6ff',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -189,13 +180,13 @@ const styles = StyleSheet.create({
       borderRadius: 40,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#264653',
+    fontSize: 30,
+    // fontWeight: 'bold',
+    color: 'green',
     fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif-medium',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 13,
     color: '#6c757d',
     marginTop: 8,
     textAlign: 'center',
@@ -218,15 +209,15 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 50,
+    height: 60,
     fontSize: 16,
     color: '#212529',
   },
   forgotPasswordText: {
     textAlign: 'right',
     color: '#16A34A',
-    fontWeight: '600',
-    marginBottom: 20,
+    fontWeight: '400',
+    marginBottom: 10,
   },
   loginButton: {
     backgroundColor: '#16A34A',
@@ -241,13 +232,13 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   dividerContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginVertical: 30,
+      marginVertical: 20,
   },
   dividerLine: {
       flex: 1,
@@ -270,13 +261,13 @@ const styles = StyleSheet.create({
       borderColor: '#ced4da',
   },
   googleIcon: {
-      width: 18,
-      height: 18,
+      width: 28,
+      height: 28,
       marginRight: 12,
   },
   googleButtonText: {
       color: '#212529',
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: '600',
   },
   signupContainer: {
@@ -285,11 +276,11 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   signupText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6c757d',
   },
   signupLink: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#16A34A',
     fontWeight: 'bold',
   },
