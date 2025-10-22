@@ -47,9 +47,9 @@ Router.get("/chat/get/user/:id", getChatHistoryByUserId);
 Router.delete("/chat/delete/:id", deleteChatHistoryById);
 
 //pest routes
-Router.post("/pest/add");
-Router.get("/pest/get");
-Router.delete("/pest/delete/:id");
+// Router.post("/pest/add");
+// Router.get("/pest/get");
+// Router.delete("/pest/delete/:id");
 
 //LLM Routes
 Router.post('/pestdetection', upload.single("image"), pestDetection)
