@@ -7,7 +7,7 @@ const HeaderTab = () => {
     <SafeAreaView style={styles.header}>
       <View style={styles.logoContainer}>
         <Image
-          source={require("../../assets/images/logo.jpeg")}
+          source={require("../../assets/images/logo.png")}
           style={{ width: 45, height: 45, borderRadius: 50, borderColor: "#83d288ff", }}
           resizeMode="contain"
         />

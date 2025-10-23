@@ -2,33 +2,35 @@ import React, { useEffect } from "react";
 import { View } from "react-native";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Welcome from "./app/Welcome";
 import { useRouter } from "expo-router";
+import Welcome from "./app/Welcome";
 
-export const URL = 'https://krishi-mittra-4.onrender.com';
+export const URL = "https://krishi-mittra-4.onrender.com";
 
-const App = () => {
+export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
     const checkUser = async () => {
-      const token = await AsyncStorage.getItem("token");
-      const user = await AsyncStorage.getItem("name");
-      AsyncStorage.setItem("weatherFetched", "false");
-      AsyncStorage.setItem("adviceFetched", "false");
-      AsyncStorage.setItem("sprayingAdviceFetched", "false");
-      AsyncStorage.removeItem("chatHistory");
-      AsyncStorage.removeItem("pestAdvice")
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const user = await AsyncStorage.getItem("name");
+        await AsyncStorage.multiSet([
+          ["weatherFetched", "false"],
+          ["adviceFetched", "false"],
+          ["sprayingAdviceFetched", "false"],
+        ]);
+        await AsyncStorage.multiRemove(["chatHistory", "pestAdvice"]);
 
-      if (!token && !user) {
-        setTimeout(() => router.replace("/signUp"), 3000);
-      } else if (!token) {
-        setTimeout(() => router.replace("/login"), 3000);
-      } else {
-        setTimeout(() => router.replace("/Home"), 3000);
+        setTimeout(() => {
+          if (!token && !user) router.replace("/signUp");
+          else if (!token) router.replace("/login");
+          else router.replace("/Home");
+        }, 3000);
+      } catch (e) {
+        console.log("Startup error:", e);
       }
     };
-
     checkUser();
   }, []);
 
@@ -38,6 +40,4 @@ const App = () => {
       <Toast />
     </View>
   );
-};
-
-export default App;
+}
