@@ -5,12 +5,12 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   Platform,
   Image
 } from 'react-native'
+import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from 'react-native-vector-icons/Feather'
 import axios from 'axios'
 import Toast from 'react-native-toast-message';
@@ -209,8 +209,7 @@ const styles = StyleSheet.create({
     borderColor: '#ced4da',
     marginBottom: 15,
     paddingHorizontal: 15,
-    borderColor: "#a7a0a0ff",
-    borderWidth: 1,
+   
   },
   icon: {
     marginRight: 10,
