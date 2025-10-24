@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
+ 
   View,
   Text,
   StyleSheet,
@@ -9,7 +9,7 @@ import {
   StatusBar,
   Alert,
 } from 'react-native';
-
+import { SafeAreaView } from "react-native-safe-area-context";
 // --- Configuration for Subscription Plans ---
 // This could be fetched from an API in a real app.
 const PLANS = [

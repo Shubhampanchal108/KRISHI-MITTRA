@@ -171,7 +171,7 @@ const HomeScreen = () => {
           )}
         </ScrollView>
       </SafeAreaView>
-      <NavigationTab />
+      <NavigationTab /> 
     </>
   );
 };

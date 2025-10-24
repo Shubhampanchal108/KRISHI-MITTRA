@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, SafeAreaView } from "react-native";
-
+import { View, Text, Image, StyleSheet} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 const WelcomeScreen = () => {
   return (
     <SafeAreaView style={styles.container}>

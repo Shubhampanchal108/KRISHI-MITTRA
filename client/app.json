@@ -18,9 +18,7 @@
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundImage": "./assets/images/icon.png",
-        "monochromeImage": "./assets/images/icon.png"
+        "foregroundImage": "./assets/images/logo.jpeg"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -52,7 +50,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "e6d332bf-526b-41f9-b4bc-8972aeb8d5d4"
+        "projectId": "ec63746f-e3b2-43b9-b1b2-3192d35535f5"
       }
     }
   }
