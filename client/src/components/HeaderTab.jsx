@@ -7,7 +7,7 @@ const HeaderTab = () => {
     <SafeAreaView style={styles.header}>
       <View style={styles.logoContainer}>
         <Image
-          source={require("../../assets/images/logo.png")}
+          source={require("../../assets/images/icon.png")}
           style={{ width: 45, height: 45, borderRadius: 50, borderColor: "#83d288ff", }}
           resizeMode="contain"
         />
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: "10%",
-    paddingBottom: 10,
+    paddingBottom: "2%",
     borderBottomWidth: 1.2,
     borderBottomColor: "#A5D6A7",
     width : "100%",

@@ -144,13 +144,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffffff",
     paddingHorizontal: 15,
     width : '100%',
-    // marginTop: 50,
+    
   },
   header: {
     fontSize: 20,
     fontWeight: "600",
     marginTop: 10,
     color: "#222",
+    marginTop: "20%",
   },
   profileContainer: {
     flexDirection: "row",

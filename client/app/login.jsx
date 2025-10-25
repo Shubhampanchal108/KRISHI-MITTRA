@@ -12,6 +12,7 @@ import {
   ScrollView,
   Platform,
   Alert,
+  ActivityIndicator
 } from 'react-native';
 
 // Third-party libraries for functionality
@@ -33,6 +34,7 @@ const errorMsg = (message) => {
 const KrishiMittraLoginScreen = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false)
   const Router = useRouter();
 
   // Function to handle the login button press with API call
@@ -41,9 +43,12 @@ const KrishiMittraLoginScreen = () => {
       errorMsg("Please fill all fields!");
       return;
     }
+    setLoading(true)
 
     try {
       const data = { phone, password };
+      setPhone("")
+      setPassword("")
       const response = await axios.post(`${URL}/api/main/login`, data);
 
       if (response.data) {
@@ -57,8 +62,7 @@ const KrishiMittraLoginScreen = () => {
         await AsyncStorage.setItem('state', response.data.user.state);
         await AsyncStorage.setItem('district', response.data.user.district);
         
-        setPhone("");
-        setPassword("");
+        setLoading(false)
 
         // Navigate to Home screen after a short delay
         setTimeout(() => {
@@ -68,6 +72,9 @@ const KrishiMittraLoginScreen = () => {
     } catch (e) {
       const msg = e.response?.data?.message || "An error occurred. Please try again.";
       errorMsg(msg);
+      setLoading(false)
+      setPhone('')
+      setPassword("")
       console.error("Login Error:", e);
     }
   };
@@ -124,7 +131,9 @@ const KrishiMittraLoginScreen = () => {
             </TouchableOpacity>
             
             <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginButtonText}>Login</Text>
+              {loading ? (<ActivityIndicator size="large" color="white"/>):
+              (<Text style={styles.loginButtonText}>Login</Text>)}
+              
             </TouchableOpacity>
           </View>
           
@@ -146,6 +155,7 @@ const KrishiMittraLoginScreen = () => {
             <Text style={styles.signupText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => Router.push('/signUp')}>
               <Text style={styles.signupLink}>Sign Up</Text>
+              
             </TouchableOpacity>
           </View>
         </ScrollView>

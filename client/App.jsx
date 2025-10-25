@@ -27,7 +27,7 @@ export default function Index() {
           if (!token && !user) router.replace("/signUp");
           else if (!token) router.replace("/login");
           else router.replace("/Home");
-        }, 3000);
+        }, 10);
       } catch (e) {
         console.log("Startup error:", e);
       }
@@ -37,7 +37,7 @@ export default function Index() {
 
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Welcome />
+      {/* <Welcome /> */}
       <Toast />
     </View>
   );
