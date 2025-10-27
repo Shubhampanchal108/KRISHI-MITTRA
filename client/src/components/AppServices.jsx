@@ -32,7 +32,7 @@ const AgriAISupport = () => {
         </TouchableOpacity>
 
         {/* Agri AI News Card */}
-        <TouchableOpacity style={styles.card} onPress={()=>Router.push('')}>
+        <TouchableOpacity style={styles.card} onPress={()=>Router.push('/LiveStream')}>
           <Image source={require("../../assets/images/sp.jpeg")} style={styles.icon} />
           <Text style={styles.title}>Live Chat</Text>
           <Text style={styles.subtitle}>Lets talk in realtime with AI</Text>

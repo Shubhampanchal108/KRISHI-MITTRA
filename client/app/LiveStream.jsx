@@ -1,13 +1,14 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, SafeAreaView, Text } from 'react-native';
 import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
-import { Camera } from 'expo-camera';
+// import { Camera } from 'expo-camera';
 
 const VideoCallScreen = () => {
   return (
     <View style={styles.container}>
       {/* Fullscreen Camera Preview */}
-      <Camera style={styles.cameraView} type={Camera.Constants.Type.front} />
+      {/* <Camera style={styles.cameraView} type={Camera.Constants.Type.front} /> */}
+      <Text>Hello</Text>
 
       {/* Bottom Navbar */}
       <SafeAreaView style={styles.navbar}>

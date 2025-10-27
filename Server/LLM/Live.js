@@ -70,7 +70,7 @@ async function live() {
     });
 
     // Send Audio Chunk
-    const fileBuffer = fs.readFileSync("sample.wav");
+    const fileBuffer = fs.readFileSync("C:\\Users\\j\\OneDrive\\Desktop\\shubham studio\\KRISHI MITTRA\\Server\\LLM\\sample.wav");
 
     // Ensure audio conforms to API requirements (16-bit PCM, 16kHz, mono)
     const wav = new WaveFile();

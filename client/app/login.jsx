@@ -126,7 +126,7 @@ const KrishiMittraLoginScreen = () => {
               />
             </View>
 
-            <TouchableOpacity onPress={() => Router.push('/forgot-password')}>
+            <TouchableOpacity onPress={() => Router.push('/OTP')}>
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
             
