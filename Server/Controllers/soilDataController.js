@@ -17,33 +17,52 @@ const getSoilData = async (req, res)=>{
 }
 
 //Add SoilData
-const addSoilData = async (req, res)=>{
-    try{
-        const {userId, soilType, phLevel, nitrogen, organicMatter, phosphorus, potassium, moisture} = req.body
+const addSoilData = async (req, res) => {
+  try {
+    const { userId, soilType, phLevel, nitrogen, organicMatter, phosphorus, potassium, moisture } = req.body;
 
-        const isUserIdExist = await soilData.findOne({userId})
+    const isUserIdExist = await soilData.findOne({ userId });
 
-        if(isUserIdExist){
-            return res.json({msg: "Data for this user already exists"})
-        }
-
-        const newSoilData = new soilData({
-            userId,
+    if (isUserIdExist) {
+      // ✅ updateOne() ke syntax me first arg filter hota hai, second update fields
+      const updatedSoilData = await soilData.updateOne(
+        { userId },
+        {
+          $set: {
             soilType,
             phLevel,
             nitrogen,
             organicMatter,
             phosphorus,
             potassium,
-            moisture
-        })
-        await newSoilData.save()
-        return res.json(newSoilData)
-    }catch(e){
-        console.log(e)
-        return res.json({e})
+            moisture,
+          },
+        }
+      );
+      return res.json({ message: "Soil data updated successfully", updatedSoilData });
     }
-}
+
+    // ✅ Agar userId nahi mila to naya document create karna
+    const newSoilData = new soilData({
+      userId,
+      soilType,
+      phLevel,
+      nitrogen,
+      organicMatter,
+      phosphorus,
+      potassium,
+      moisture,
+    });
+
+    await newSoilData.save();
+    return res.json({ message: "Soil data added successfully", newSoilData });
+
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: e.message });
+  }
+};
+
 
 //Update SoilData
 const updateSoilData = async (req, res)=>{

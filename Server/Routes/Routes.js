@@ -31,7 +31,7 @@ Router.post("/signup", signup);
 Router.post("/login", login);
 Router.get("/getallusers", getAllUsers);
 Router.get("/getuser/:id", getUserDetails);
-Router.put("/updateuser/:id", updateUser);
+Router.put("/updateuser/:userId", updateUser);
 Router.delete("/deleteuser/:id", deleteUser);
 
 //Soil routes

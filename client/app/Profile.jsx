@@ -9,6 +9,7 @@ import { useRouter } from "expo-router";
 import FeedbackModal from "../src/components/Modal";
 import EditProfileModal from "../src/components/EditProfile";
 import SoilDataModal from "../src/components/SoilData";
+import Toast from "react-native-toast-message";
 
 const Profile = () => {
 
@@ -33,6 +34,7 @@ const Profile = () => {
 
   const handleLogout = async()=>{
     try {
+      successMsg("Logout Succesfully.")
       AsyncStorage.removeItem('token');
       // AsyncStorage.removeItem('name');
       // AsyncStorage.removeItem('userId');
@@ -40,7 +42,7 @@ const Profile = () => {
       // AsyncStorage.removeItem('state');
       // AsyncStorage.removeItem('district');
 
-      successMsg("Logout Succesfully.")
+      
       setTimeout(()=>{
         Router.push('/login')
       }, 1000)
@@ -132,6 +134,7 @@ const Profile = () => {
       {/* Bottom Navigation */}
     </View>
       <NavTab/>
+      <Toast/>
       </>
   );
 };

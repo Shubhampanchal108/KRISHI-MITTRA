@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,19 +7,62 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
+import { errorMsg, successMsg } from "../utils/Notification";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { URL } from "../../App";
+import Toast from "react-native-toast-message";
 
 const EditProfileModal = ({ visible, onClose, onSubmit, initialData }) => {
-  console.log(initialData.name)
-  const [name, setName] = useState(initialData.name || "");
-  const [state, setState] = useState(initialData.state || "");
-  const [district, setDistrict] = useState(initialData.district || "");
-  const [password, setPassword] = useState(initialData.password || "");
+  const [name, setName] = useState("");
+  const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    onSubmit({ name, state, district, password });
-    onClose();
+  const handleSubmit = async () => {
+    try {
+      if (!name || !phone || !district || !state)
+        return errorMsg("All Fields Required");
+
+      setLoading(true);
+      const userId = await AsyncStorage.getItem("userId");
+      const data = { name, phone, district, state };
+      const response = await axios.put(
+        `${URL}/api/main/updateuser/${userId}`,
+        data
+      );
+
+      if (response.data) {
+        setLoading(false);
+        console.log(response.data);
+        successMsg("Profile Updated Successfully");
+        AsyncStorage.multiSet([
+          ["name", name],
+          ["phone", phone],
+          ["state", state],
+          ["district", district],
+        ]);
+      }
+    } catch (e) {
+      console.log(e);
+      errorMsg("Something went Wrong.");
+      setLoading(false)
+    }
   };
+
+  useEffect(() => {
+    const getUserData = async () => {
+      setName(await AsyncStorage.getItem("name"));
+      setState(await AsyncStorage.getItem("state"));
+      setDistrict(await AsyncStorage.getItem("district"));
+      setPhone(await AsyncStorage.getItem("phone"));
+    };
+    getUserData();
+  }, []);
 
   return (
     <Modal
@@ -35,32 +78,39 @@ const EditProfileModal = ({ visible, onClose, onSubmit, initialData }) => {
             <TextInput
               style={styles.input}
               placeholder="Name"
-              value={initialData.name}
+              value={name}
               onChangeText={setName}
             />
             <TextInput
               style={styles.input}
               placeholder="State"
-              value={initialData.state}
+              value={state}
               onChangeText={setState}
             />
             <TextInput
               style={styles.input}
               placeholder="District"
-              value={initialData.district}
+              value={district}
               onChangeText={setDistrict}
             />
             <TextInput
               style={styles.input}
               placeholder="Phone No"
-              value={initialData.phone}
-              onChangeText={setPassword}
+              value={phone}
+              onChangeText={setPhone}
             />
           </ScrollView>
 
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Save</Text>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}
+            >
+              {loading ? (
+                <ActivityIndicator size="large" color="white" />
+              ) : (
+                <Text style={styles.buttonText}>Save</Text>
+              )}
             </TouchableOpacity>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <Text style={styles.buttonText}>Cancel</Text>
@@ -68,6 +118,7 @@ const EditProfileModal = ({ visible, onClose, onSubmit, initialData }) => {
           </View>
         </View>
       </View>
+      <Toast />
     </Modal>
   );
 };
@@ -88,7 +139,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     maxHeight: "80%",
   },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 15, textAlign: "center" },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",

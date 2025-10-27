@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,27 +6,83 @@ import {
   TouchableOpacity,
   Modal,
   StyleSheet,
+  ActivityIndicator
 } from "react-native";
+import {URL} from "../../App"
+import axios from "axios";
+import {errorMsg, successMsg} from '../utils/Notification'
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
 const SoilDataModal = ({ visible, onClose, onSubmit }) => {
   const [soilType, setSoilType] = useState("");
-  const [ph, setPh] = useState("");
-  const [moisture, setMoisture] = useState("");
-  const [temperature, setTemperature] = useState("");
+  const [phLevel, setPhLevel] = useState("");
+  const [nitrogen, setNitrogen] = useState("");
+  const [organicMatter, setOrganicMatter] = useState("");
+  const [phosphorus, setPhosphorus] = useState('')
+  const [potassium, setPotassium] = useState('')
+  const [moisture, setMoisture] = useState('')
+  const [loading , setLoading] = useState(false)
 
-  const handleSubmit = () => {
-    if (!soilType || !ph || !moisture || !temperature) {
-      alert("Please fill all fields!");
+  const handleSubmit = async() => {
+    if (!nitrogen ||!potassium || !phosphorus) {
+      alert("nitrogen, potassium and phosphorus are required feilds");
       return;
     }
-    const soilData = { soilType, ph, moisture, temperature };
-    onSubmit(soilData);
-    setSoilType("");
-    setPh("");
-    setMoisture("");
-    setTemperature("");
-    onClose();
+    setLoading(true)
+    const userId = await AsyncStorage.getItem("userId")
+    const soilData = {userId, soilType, phLevel, moisture, nitrogen, phosphorus, potassium, organicMatter };
+    // onSubmit(soilData);
+
+    try {
+      const response = await axios.post(`${URL}/api/main/soil/add`, soilData)
+      
+      if(response.data){
+        successMsg("Soil Data uploaded Sucessfully.")
+        console.log(response.data)
+        AsyncStorage.setItem("soilData", JSON.stringify(soilData))
+        
+        // setSoilType("");
+        // setPhLevel("");
+        // setPotassium("");
+        // setNitrogen("");
+        // setOrganicMatter('')
+        // setMoisture('')
+        // setPhosphorus('')
+        setLoading(false)
+      }
+    } catch (error) {
+      console.log(error)
+      errorMsg("Someting went wrong")
+      setLoading(false)
+    }
+    
   };
+
+useEffect(() => {
+  const getSoilData = async () => {
+    try {
+      // ✅ Correct way — key ko string me do, parse mat karo
+      const storedData = await AsyncStorage.getItem("soilData");
+      
+      if (storedData) {
+        const data = JSON.parse(storedData); // ✅ ab yahan parse karo
+        setSoilType(data.soilType);
+        setPhLevel(data.phLevel);
+        setPotassium(data.potassium);
+        setNitrogen(data.nitrogen);
+        setOrganicMatter(data.organicMatter);
+        setMoisture(data.moisture);
+        setPhosphorus(data.phosphorus);
+      }
+    } catch (error) {
+      console.error("Error fetching soil data:", error);
+    }
+  };
+
+  getSoilData();
+}, []);
+
 
   return (
     <Modal
@@ -46,11 +102,11 @@ const SoilDataModal = ({ visible, onClose, onSubmit }) => {
             onChangeText={setSoilType}
           />
           <TextInput
-            placeholder="pH Level"
+            placeholder="pH Level (%)"
             keyboardType="numeric"
             style={styles.input}
-            value={ph}
-            onChangeText={setPh}
+            value={phLevel}
+            onChangeText={setPhLevel}
           />
           <TextInput
             placeholder="Moisture (%)"
@@ -60,11 +116,32 @@ const SoilDataModal = ({ visible, onClose, onSubmit }) => {
             onChangeText={setMoisture}
           />
           <TextInput
-            placeholder="Temperature (°C)"
+            placeholder="Nitrogen (%)"
             keyboardType="numeric"
             style={styles.input}
-            value={temperature}
-            onChangeText={setTemperature}
+            value={nitrogen}
+            onChangeText={setNitrogen}
+          />
+          <TextInput
+            placeholder="phosphorus (%)"
+            keyboardType="numeric"
+            style={styles.input}
+            value={phosphorus}
+            onChangeText={setPhosphorus}
+          />
+          <TextInput
+            placeholder="potassium (%)"
+            keyboardType="numeric"
+            style={styles.input}
+            value={potassium}
+            onChangeText={setPotassium}
+          />
+          <TextInput
+            placeholder="organicMatter (%)"
+            keyboardType="numeric"
+            style={styles.input}
+            value={organicMatter}
+            onChangeText={setOrganicMatter}
           />
 
           <View style={styles.btnRow}>
@@ -73,11 +150,15 @@ const SoilDataModal = ({ visible, onClose, onSubmit }) => {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.uploadBtn} onPress={handleSubmit}>
-              <Text style={styles.btnText}>Upload</Text>
+              {/* */}
+              {loading ?(<ActivityIndicator size="small" color="white"/>) 
+              :( <Text style={styles.btnText}>Upload</Text>)}
+              
             </TouchableOpacity>
           </View>
         </View>
       </View>
+      <Toast/>
     </Modal>
   );
 };

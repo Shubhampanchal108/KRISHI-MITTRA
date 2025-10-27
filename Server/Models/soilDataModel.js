@@ -8,11 +8,9 @@ const soilSchema = new mongoose.Schema({
     },
     soilType: {
         type: String,
-        required: true
     },
     phLevel: {
         type: Number,
-        required: true
     },
     nitrogen: {
         type: Number,

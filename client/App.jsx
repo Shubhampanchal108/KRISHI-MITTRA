@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import Welcome from "./app/Welcome";
 
-export const URL = 'https://krishi-mittra-4.onrender.com';
+export const URL = 'http://192.168.1.6:5000';
 
 
 export default function Index() {

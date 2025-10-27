@@ -6,16 +6,39 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator
 } from "react-native";
+import axios from "axios";
+import { errorMsg, successMsg } from "../utils/Notification";
+import { URL } from "../../App";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
 const FeedbackModal = ({ visible, onClose, onSubmit }) => {
   const [feedback, setFeedback] = useState("");
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
     if (feedback.trim() === "") return; // empty feedback check
-    onSubmit(feedback);
-    setFeedback("");
-    onClose();
+    
+    try{
+      setLoading(true)
+      const userId = await AsyncStorage.getItem("userId")
+      const data = {userId,feedback}
+      const response = await axios.post(`${URL}/api/main/feedback/add`, data)
+
+      if(response.data){
+        successMsg("Your Feedback is send to admins.")
+        console.log(response.data)
+        setFeedback("")
+        setLoading(false)
+      }
+    }catch(e){
+      console.log(e)
+      setFeedback("")
+      setLoading(false)
+      errorMsg("Something went wrong.")
+    }
   };
 
   return (
@@ -39,7 +62,8 @@ const FeedbackModal = ({ visible, onClose, onSubmit }) => {
 
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Submit</Text>
+              
+              {loading ? (<ActivityIndicator size="small" color="white"/>): (<Text style={styles.buttonText}>Submit</Text>)}
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -48,6 +72,7 @@ const FeedbackModal = ({ visible, onClose, onSubmit }) => {
           </View>
         </View>
       </View>
+      <Toast/>
     </Modal>
   );
 };
