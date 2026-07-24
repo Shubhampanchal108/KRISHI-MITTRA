@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const WEATHER_KEY = "2888314fe95f78d2be18da5a6099af04";
+const WEATHER_KEY = process.env.EXPO_PUBLIC_WEATHER_KEY;
 
 export async function getWeatherInfo(city) {
   const Weather_URL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${WEATHER_KEY}`;

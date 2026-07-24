@@ -13,7 +13,7 @@ It empowers farmers by offering soil health analysis, fertilizer guidance, pest 
 - 🐛 **Pest & Disease Detection:** Upload images to detect plant diseases instantly using AI.  
 - 🎙️ **Voice Interaction:** Voice-based support for low-literate users.  
 - 📊 **Feedback System:** Collects user feedback for continuous improvement.  
-- 📡 **Live Streaming:** Powered by Gemini Live API for real-time expert sessions and field monitoring.  
+- 📡 **Live Streaming:** Powered by Groq API for real-time expert sessions and field monitoring.  
 - ☁️ **External Integrations:** Weather and Market APIs for instant, accurate data.
 
 ---
@@ -31,7 +31,7 @@ It empowers farmers by offering soil health analysis, fertilizer guidance, pest 
 
 ### **AI & Integrations**
 - **Open-Source LLM Model** — For AI advisory and multilingual response generation.  
-- **Gemini Live API** — Enables live video and data streaming.  
+- **Groq API** — Enables live audio transcription and response generation.  
 - **External APIs:**  
   - Weather API 🌦️  
   - Agmarknet API 💰  

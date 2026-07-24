@@ -1,8 +1,10 @@
-const {GoogleGenAI, createUserContent, createPartFromUri,} = require("@google/genai")
-const env = require('dotenv').config()
+const Groq = require("groq-sdk");
+const fs = require("fs");
+const path = require("path");
+require("dotenv").config();
 
-const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 const Instructions = `You are Krishi Mitra Vision AI, a specialized agricultural image analysis model developed by Shubham.
@@ -41,42 +43,52 @@ NSFW or harmful content
 Multiple images mixed with unrelated content
 
 💬 Maintain tone:
-Always respond in Hindi`
+Always respond in Hindi`;
 
 let chatHistory = [];
 
+function getMimeType(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext === ".png") return "image/png";
+  if (ext === ".webp") return "image/webp";
+  if (ext === ".gif") return "image/gif";
+  return "image/jpeg";
+}
+
 async function PestScanner(imageUrl, query) {
   try {
-    // Upload image
-    const image = await ai.files.upload({
-      file: imageUrl,
-    });
+    const mimeType = getMimeType(imageUrl);
+    const fileBuffer = fs.readFileSync(imageUrl);
+    const base64Image = fileBuffer.toString("base64");
+    const dataUrl = `data:${mimeType};base64,${base64Image}`;
 
-    // Create a chat session with model + past history
-    const chat = await ai.chats.create({
-      model: "gemini-2.5-flash",
-      history: chatHistory,
-      config: {
-        systemInstruction: Instructions,
+    const messages = [
+      { role: "system", content: Instructions },
+      ...chatHistory,
+      {
+        role: "user",
+        content: [
+          { type: "text", text: query || "Analyze this agricultural image." },
+          { type: "image_url", image_url: { url: dataUrl } },
+        ],
       },
+    ];
+
+    const response = await groq.chat.completions.create({
+      model: "llama-3.2-11b-vision-instruct",
+      messages: messages,
+      temperature: 0.7,
+      max_completion_tokens: 1024,
     });
 
-    // Send query with image
-    const response = await chat.sendMessage({
-      message: [
-        query,
-        createPartFromUri(image.uri, image.mimeType),
-      ],
-    });
+    const rawText = response.choices[0]?.message?.content || "";
+    const text = rawText.replace(/[*#@!$%^&()_+={}[\]\\|;:'"<>/?~-]/g, "");
 
-    // Clean text response
-    const text = response.text.replace(/[*#@!$%^&()_+={}[\]\\|;:'"<>/?~-]/g, "");
-
-    // Update in-memory chat history
     chatHistory.push(
-      { role: "user", parts: [{ text: query }] },
-      { role: "model", parts: [{ text }] }
+      { role: "user", content: query },
+      { role: "assistant", content: text }
     );
+
     return text;
   } catch (err) {
     console.error("Error in PestScanner:", err);
@@ -84,4 +96,4 @@ async function PestScanner(imageUrl, query) {
   }
 }
 
-module.exports = {PestScanner}
+module.exports = { PestScanner };

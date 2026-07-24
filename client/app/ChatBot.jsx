@@ -30,33 +30,37 @@ const Chatbot = () => {
   ]);
   const [input, setInput] = useState("");
 
-  const convertGeminiToMessages = (geminiHistory) => {
-    return geminiHistory.map((item, index) => ({
-      id: index + 1,
-      text: item.parts?.[0]?.text || "",
-      sender: item.role === "user" ? "user" : "bot",
-    }));
+  const convertHistoryToMessages = (history) => {
+    return history.map((item, index) => {
+      const text = item.content || item.parts?.[0]?.text || item.text || "";
+      const isUser = item.role === "user";
+      return {
+        id: index + 1,
+        text,
+        sender: isUser ? "user" : "bot",
+      };
+    });
   };
 
-  useEffect(()=>{
-    const loadChats = async()=>{
+  useEffect(() => {
+    const loadChats = async () => {
       try {
         const storedHistory = await AsyncStorage.getItem("chatHistory");
 
         if (storedHistory) {
           const parsedHistory = JSON.parse(storedHistory);
-          console.log(parsedHistory)
+          console.log(parsedHistory);
           if (parsedHistory.length > 0) {
-            const converted = convertGeminiToMessages(parsedHistory);
+            const converted = convertHistoryToMessages(parsedHistory);
             setMessages(converted);
           }
         }
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
-    }
+    };
     loadChats();
-  }, [])
+  }, []);
 
   const handleSend = async () => {
     

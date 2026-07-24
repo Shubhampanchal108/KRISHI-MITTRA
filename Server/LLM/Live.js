@@ -1,121 +1,51 @@
-// Test file: https://storage.googleapis.com/generativeai-downloads/data/16000.wav
-const { GoogleGenAI, Modality } = require('@google/genai');
+const Groq = require('groq-sdk');
 const fs = require('fs');
-const pkg = require('wavefile');  // npm install wavefile
-const WaveFile = pkg.WaveFile;
+const path = require('path');
+require('dotenv').config();
 
-
-const ai = new GoogleGenAI({
-    apiKey: "AIzaSyB6ge5vHjsCkirRKi1j8voS7EpC0D6QXB4",
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
-// WARNING: Do not use API keys in client-side (browser based) applications
-// Consider using Ephemeral Tokens instead
-// More information at: https://ai.google.dev/gemini-api/docs/ephemeral-tokens
 
-// New native audio model:
-const model = "gemini-2.5-flash-native-audio-preview-09-2025"
-
-const config = {
-  responseModalities: [Modality.AUDIO],
-  systemInstruction: "You are a helpful assistant and answer in a friendly tone."
-};
-
-async function live() {
-    const responseQueue = [];
-
-    async function waitMessage() {
-        let done = false;
-        let message = undefined;
-        while (!done) {
-            message = responseQueue.shift();
-            if (message) {
-                done = true;
-            } else {
-                await new Promise((resolve) => setTimeout(resolve, 100));
-            }
-        }
-        return message;
+async function liveAudioProcessing(filePath) {
+  try {
+    if (!fs.existsSync(filePath)) {
+      console.log(`Audio file not found at ${filePath}`);
+      return;
     }
 
-    async function handleTurn() {
-        const turns = [];
-        let done = false;
-        while (!done) {
-            const message = await waitMessage();
-            turns.push(message);
-            if (message.serverContent && message.serverContent.turnComplete) {
-                done = true;
-            }
-        }
-        return turns;
-    }
-
-    const session = await ai.live.connect({
-        model: model,
-        callbacks: {
-            onopen: function () {
-                console.debug('Opened');
-            },
-            onmessage: function (message) {
-                responseQueue.push(message);
-            },
-            onerror: function (e) {
-                console.debug('Error:', e.message);
-            },
-            onclose: function (e) {
-                console.debug('Close:', e.reason);
-            },
-        },
-        config: config,
+    const audioFile = fs.createReadStream(filePath);
+    const transcription = await groq.audio.transcriptions.create({
+      file: audioFile,
+      model: "whisper-large-v3",
+      response_format: "json",
     });
 
-    // Send Audio Chunk
-    const fileBuffer = fs.readFileSync("C:\\Users\\j\\OneDrive\\Desktop\\shubham studio\\KRISHI MITTRA\\Server\\LLM\\sample.wav");
+    console.log("Transcribed Audio:", transcription.text);
 
-    // Ensure audio conforms to API requirements (16-bit PCM, 16kHz, mono)
-    const wav = new WaveFile();
-    wav.fromBuffer(fileBuffer);
-    wav.toSampleRate(16000);
-    wav.toBitDepth("16");
-    const base64Audio = wav.toBase64();
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: "You are a helpful agricultural assistant and answer in a friendly tone." },
+        { role: "user", content: transcription.text },
+      ],
+    });
 
-    // If already in correct format, you can use this:
-    // const fileBuffer = fs.readFileSync("sample.pcm");
-    // const base64Audio = Buffer.from(fileBuffer).toString('base64');
-
-    session.sendRealtimeInput(
-        {
-            audio: {
-                data: base64Audio,
-                mimeType: "audio/pcm;rate=16000"
-            }
-        }
-
-    );
-
-    const turns = await handleTurn();
-
-    // Combine audio data strings and save as wave file
-    const combinedAudio = turns.reduce((acc, turn) => {
-        if (turn.data) {
-            const buffer = Buffer.from(turn.data, 'base64');
-            const intArray = new Int16Array(buffer.buffer, buffer.byteOffset, buffer.byteLength / Int16Array.BYTES_PER_ELEMENT);
-            return acc.concat(Array.from(intArray));
-        }
-        return acc;
-    }, []);
-
-    const audioBuffer = new Int16Array(combinedAudio);
-
-    const wf = new WaveFile();
-    wf.fromScratch(1, 24000, '16', audioBuffer);  // output is 24kHz
-    fs.writeFileSync('audio.wav', wf.toBuffer());
-
-    session.close();
+    const responseText = completion.choices[0]?.message?.content;
+    console.log("Groq Response:", responseText);
+    return responseText;
+  } catch (e) {
+    console.error("Error processing live audio:", e);
+  }
 }
 
 async function main() {
-    await live().catch((e) => console.error('got error', e));
+  const samplePath = path.join(__dirname, 'sample.wav');
+  await liveAudioProcessing(samplePath).catch((e) => console.error('Got error:', e));
 }
 
-main()
+if (require.main === module) {
+  main();
+}
+
+module.exports = { liveAudioProcessing };
