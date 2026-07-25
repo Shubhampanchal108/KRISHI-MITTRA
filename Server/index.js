@@ -3,6 +3,7 @@ const app = express();
 const env = require('dotenv').config()
 const DB_Connection = require('./Connections/Database')
 const cors = require('cors')
+const path = require('path')
 const Routes = require('./Routes/Routes')
 
 
@@ -19,6 +20,7 @@ const PORT = process.env.PORT || 3000;
 //Middlewares
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use('/uploads', express.static(path.join(__dirname, 'Middlewares', 'uploads')))
 
 
 //Routes

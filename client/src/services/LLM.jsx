@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { instruction, Weather_INS_LLM } from "./instruction";
+import { buildSystemInstruction, Weather_INS_LLM } from "./instruction";
+import { fetchFarmerContext } from "./farmerContext";
 
 const apiKey = process.env.EXPO_PUBLIC_GROQ_KEY;
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -8,12 +9,10 @@ const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 async function getChatHistory() {
   try {
     const history = await AsyncStorage.getItem("chatHistory");
-    console.log("Loaded chat history:", history);
     if (!history) return [];
 
     const parsed = JSON.parse(history);
     return parsed.map((item) => {
-      // Legacy Gemini format handling
       if (item.parts && Array.isArray(item.parts)) {
         return {
           role: item.role === "model" ? "assistant" : "user",
@@ -31,13 +30,20 @@ async function getChatHistory() {
   }
 }
 
-// ✅ Main LLM function using Groq API
-export async function LLM(query) {
+/**
+ * Main LLM function using Groq API.
+ * Automatically injects real-time Farmer Personal Info, Soil Data, and Weather Conditions into the prompt.
+ */
+export async function LLM(query, providedContext = null) {
   try {
     const history = await getChatHistory();
 
+    // Fetch complete farmer context (soil, weather, profile) if not directly provided
+    const farmerContext = providedContext || (await fetchFarmerContext());
+    const systemPrompt = buildSystemInstruction(farmerContext);
+
     const messages = [
-      { role: "system", content: instruction },
+      { role: "system", content: systemPrompt },
       ...history,
       { role: "user", content: query },
     ];
@@ -72,8 +78,6 @@ export async function LLM(query) {
     ];
 
     await AsyncStorage.setItem("chatHistory", JSON.stringify(newHistory));
-    console.log("Chat history updated:", await AsyncStorage.getItem("chatHistory"));
-
     return text;
   } catch (err) {
     console.error("Error in LLM:", err);
@@ -81,9 +85,26 @@ export async function LLM(query) {
   }
 }
 
-// Weather data advice LLM using Groq API
+/**
+ * Weather data advice LLM using Groq API.
+ * Enhances weather prompt with farmer profile & soil context if available.
+ */
 export async function WeatherLLM(data) {
   try {
+    const farmerContext = await fetchFarmerContext();
+    const profile = farmerContext?.profile || {};
+    const soil = farmerContext?.soil || {};
+
+    let extraContext = "";
+    if (profile.name || profile.district) {
+      extraContext += `Farmer Name: ${profile.name || "Kisan"}, Location: ${profile.district || ""}, ${profile.state || ""}. `;
+    }
+    if (soil.soilType || soil.phLevel) {
+      extraContext += `Soil Type: ${soil.soilType || "N/A"}, pH: ${soil.phLevel || "N/A"}, NPK: N:${soil.nitrogen || "N/A"}% P:${soil.phosphorus || "N/A"}% K:${soil.potassium || "N/A"}%. `;
+    }
+
+    const promptUser = `${extraContext}Give me practical farming advice based on this weather data: ${data}`;
+
     const response = await fetch(GROQ_API_URL, {
       method: "POST",
       headers: {
@@ -94,7 +115,7 @@ export async function WeatherLLM(data) {
         model: "llama-3.3-70b-versatile",
         messages: [
           { role: "system", content: Weather_INS_LLM },
-          { role: "user", content: "give me advice based on this weather data: " + data },
+          { role: "user", content: promptUser },
         ],
         temperature: 0.7,
       }),
@@ -107,7 +128,6 @@ export async function WeatherLLM(data) {
     }
 
     const rawText = resData.choices[0]?.message?.content || "";
-    console.log("Weather advice:", rawText);
     return rawText.replace(/[*#@!$%^&()_+={}[\]\\|;:'",<>/?~-]/g, "");
   } catch (err) {
     console.error("Error in WeatherLLM:", err);

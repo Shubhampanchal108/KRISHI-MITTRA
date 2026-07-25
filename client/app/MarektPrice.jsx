@@ -13,6 +13,7 @@ import {
   RefreshControl,
   StatusBar,
   SafeAreaView,
+  Platform,
 } from 'react-native';
 import { Ionicons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import NavigationTab from '../src/components/NavigationTab';
@@ -86,19 +87,19 @@ export default function MandiScreen() {
         Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
         Animated.timing(slideAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
       ]).start();
-    } catch (e) {
+    } catch (_e) {
       setError('Could not fetch mandi data. Please try again.');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [selectedCrop, selectedState]);
+  }, [selectedCrop, selectedState, fadeAnim, slideAnim]);
 
   useEffect(() => {
     fadeAnim.setValue(0);
     slideAnim.setValue(30);
     loadData();
-  }, [loadData]);
+  }, [loadData, fadeAnim, slideAnim]);
 
   // ─── Filter & Sort ─────────────────────────────────────────────────────────
   const filteredData = mandiData
@@ -373,14 +374,16 @@ export default function MandiScreen() {
       </View>
 
       {/* ── Crop Filter Tabs ─────────────────────────────────────────────── */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.cropTabsScroll}
-        contentContainerStyle={styles.cropTabsContent}
-      >
-        {POPULAR_CROPS.map(renderCropTab)}
-      </ScrollView>
+      <View style={styles.cropTabsContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.cropTabsScroll}
+          contentContainerStyle={styles.cropTabsContent}
+        >
+          {POPULAR_CROPS.map(renderCropTab)}
+        </ScrollView>
+      </View>
 
       {/* ── Sort Row ────────────────────────────────────────────────────── */}
       <View style={styles.sortRow}>
@@ -465,7 +468,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 8 : 12,
     paddingBottom: 12,
     backgroundColor: COLORS.bg,
   },
@@ -522,24 +525,29 @@ const styles = StyleSheet.create({
   },
 
   // ── Crop Tabs ────────────────────────────────────────────────────────────
-  cropTabsScroll: {
+  cropTabsContainer: {
+    height: 42,
     marginBottom: 10,
   },
+  cropTabsScroll: {
+    flexGrow: 0,
+    height: 42,
+  },
   cropTabsContent: {
-    paddingHorizontal: 12,
-    gap: 8,
+    paddingHorizontal: 16,
+    alignItems: 'center',
   },
   cropTab: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    justifyContent: 'center',
+    height: 36,
     backgroundColor: COLORS.card,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    borderRadius: 18,
+    paddingHorizontal: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginRight: 6,
+    marginRight: 8,
   },
   cropTabActive: {
     backgroundColor: COLORS.primary,

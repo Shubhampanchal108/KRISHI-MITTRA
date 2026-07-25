@@ -20,7 +20,7 @@ const EditProfileModal = ({ visible, onClose, onSubmit, initialData }) => {
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -28,7 +28,24 @@ const EditProfileModal = ({ visible, onClose, onSubmit, initialData }) => {
       if (!name || !phone || !district || !state)
         return errorMsg("All Fields Required");
 
+      if (phone.trim().length < 10) {
+        return errorMsg("Mobile number should not be less than 10 digits!");
+      }
+
       setLoading(true);
+
+      // Validate state and district via LLM endpoint first
+      const validationResponse = await axios.post(`${URL}/api/main/validate-location`, {
+        state: state.trim(),
+        district: district.trim(),
+      });
+
+      if (validationResponse.data?.status !== "valid") {
+        errorMsg("Please enter a valid State and District of India.");
+        setLoading(false);
+        return;
+      }
+
       const userId = await AsyncStorage.getItem("userId");
       const data = { name, phone, district, state };
       const response = await axios.put(
@@ -40,12 +57,14 @@ const EditProfileModal = ({ visible, onClose, onSubmit, initialData }) => {
         setLoading(false);
         console.log(response.data);
         successMsg("Profile Updated Successfully");
-        AsyncStorage.multiSet([
+        await AsyncStorage.multiSet([
           ["name", name],
           ["phone", phone],
           ["state", state],
           ["district", district],
         ]);
+        onSubmit(data);
+        onClose();
       }
     } catch (e) {
       console.log(e);

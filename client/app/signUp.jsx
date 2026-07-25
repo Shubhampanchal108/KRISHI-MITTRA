@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,13 +12,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Feather from "react-native-vector-icons/Feather";
+import { Feather } from "@expo/vector-icons";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { URL } from "@/App";
-import { successMsg, errorMsg } from "../src/utils/Notification";
+import { successMsg, errorMsg, infoMsg } from "../src/utils/Notification";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { useGoogleAuthPrompt, processGoogleAuthResponse } from "../src/services/firebase";
 
 // --- Main App Component ---
 export default function App() {
@@ -28,51 +29,148 @@ export default function App() {
   const [district, setDistrict] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const Router = useRouter();
 
-  //handle signup logic here
+  // ── Real Google OAuth hook ─────────────────────────────────────────────
+  const [googlePrompt, isGoogleConfigured, googleResponse] = useGoogleAuthPrompt();
+
+  // Process Google response when it changes
+  useEffect(() => {
+    if (!googleResponse) return;
+
+    // User dismissed / cancelled the Google sign-in sheet
+    if (googleResponse.type === 'cancel' || googleResponse.type === 'dismiss') {
+      infoMsg('Cancelled', 'Google Sign-Up was cancelled.');
+      setGoogleLoading(false);
+      return;
+    }
+
+    // Any other non-success response (error, locked, etc.)
+    if (googleResponse.type !== 'success') {
+      errorMsg('Error', `Google Sign-Up failed (${googleResponse.type}). Please try again.`);
+      setGoogleLoading(false);
+      return;
+    }
+
+    const handleGoogleResponse = async () => {
+      setGoogleLoading(true);
+      try {
+        const userProfile = await processGoogleAuthResponse(googleResponse);
+
+        const payload = {
+          name: userProfile.name,
+          email: userProfile.email,
+          googleId: userProfile.googleId,
+          picture: userProfile.photoUrl,
+        };
+
+        const response = await axios.post(`${URL}/api/main/google-login`, payload);
+
+        if (response.data && response.data.token) {
+          successMsg('Success', 'Google Sign-Up successful!');
+          await AsyncStorage.setItem("token", response.data.token);
+          await AsyncStorage.setItem("name", response.data.user.name);
+          await AsyncStorage.setItem("userId", response.data.user._id);
+          await AsyncStorage.setItem("state", response.data.user.state || "India");
+          await AsyncStorage.setItem("district", response.data.user.district || "General");
+
+          setTimeout(() => {
+            Router.push("/Home");
+          }, 1200);
+        }
+      } catch (e) {
+        const msg = e.response?.data?.message || e.message || "Google Sign-Up failed. Please try again.";
+        errorMsg('Error', msg);
+        console.error("Google Sign-Up Error:", e);
+      } finally {
+        setGoogleLoading(false);
+      }
+    };
+
+    handleGoogleResponse();
+  }, [googleResponse]);
+
+// handle signup logic
   const handleSignup = async () => {
     if (!name || !phone || !state || !district || !password) {
       errorMsg("Please fill all fields!");
       return;
     }
+    if (phone.trim().length < 10) {
+      errorMsg("Mobile number should not be less than 10 digits!");
+      return;
+    }
     setLoading(true);
     try {
-      const data = { name, phone, state, district, password };
-      setDistrict("");
-      setName("");
-      setPhone("");
-      setPassword("");
-      setState("");
+      // Validate state and district via LLM endpoint first
+      const validationResponse = await axios.post(`${URL}/api/main/validate-location`, {
+        state: state.trim(),
+        district: district.trim(),
+      });
+
+      if (validationResponse.data?.status !== "valid") {
+        errorMsg("Please enter a valid State and District of India.");
+        setLoading(false);
+        return;
+      }
+
+      const data = {
+        name,
+        phone,
+        state,
+        district,
+        password,
+      };
+
       const response = await axios.post(`${URL}/api/main/signup`, data);
 
       if (response.data) {
         successMsg("SignUp successfully.");
 
-        AsyncStorage.setItem("token", response.data.token);
-        AsyncStorage.setItem("name", response.data.user.name);
-        AsyncStorage.setItem("userId", response.data.user._id);
-        AsyncStorage.setItem("phone", response.data.user.phone);
-        AsyncStorage.setItem("state", response.data.user.state);
-        AsyncStorage.setItem("district", response.data.user.district);
+        await AsyncStorage.setItem("token", response.data.token);
+        await AsyncStorage.setItem("name", response.data.user.name);
+        await AsyncStorage.setItem("userId", response.data.user._id);
+        await AsyncStorage.setItem("phone", response.data.user.phone);
+        await AsyncStorage.setItem("state", response.data.user.state);
+        await AsyncStorage.setItem("district", response.data.user.district);
+        
+        // Clear fields on success
+        setDistrict("");
+        setName("");
+        setPhone("");
+        setPassword("");
+        setState("");
+        setShowPassword(false);
         setLoading(false);
-        successMsg("SignUp successfully");
 
+        // Redirect to SecurityQuestions screen after successful signup
         setTimeout(() => {
-          Router.push("/Home");
-        }, 2000);
+          Router.push(`/SecurityQuestions?userId=${response.data.user._id}`);
+        }, 1000);
       }
     } catch (e) {
       const msg = e.response?.data?.message || "Internal Server Error.";
       errorMsg(msg);
       setLoading(false);
-      setName("");
-      setPassword("");
-      setPhone("");
-      setState("");
-      setDistrict("");
-      console.log(e);
+    }
+  };
+
+  // Google Sign-Up trigger
+  const handleGoogleSignUp = async () => {
+    if (!isGoogleConfigured) {
+      errorMsg("Google Sign-In is not configured. Please add EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID to .env.local");
+      return;
+    }
+    setGoogleLoading(true);
+    try {
+      await googlePrompt();
+      // result handled in useEffect above
+    } catch (e) {
+      errorMsg("Could not open Google Sign-In. Please try again.");
+      setGoogleLoading(false);
     }
   };
 
@@ -112,14 +210,8 @@ export default function App() {
             />
           </View>
 
-          {/* In a real app, these would likely be dropdowns/pickers */}
           <View style={styles.inputWrapper}>
-            <Feather
-              name="map-pin"
-              size={20}
-              color="#666"
-              style={styles.icon}
-            />
+            <Feather name="map-pin" size={20} color="#666" style={styles.icon} />
             <TextInput
               style={styles.input}
               placeholder="State"
@@ -130,12 +222,7 @@ export default function App() {
           </View>
 
           <View style={styles.inputWrapper}>
-            <Feather
-              name="map-pin"
-              size={20}
-              color="#666"
-              style={styles.icon}
-            />
+            <Feather name="map-pin" size={20} color="#666" style={styles.icon} />
             <TextInput
               style={styles.input}
               placeholder="District"
@@ -153,11 +240,14 @@ export default function App() {
               placeholderTextColor="#888"
               value={password}
               onChangeText={setPassword}
-              secureTextEntry
+              secureTextEntry={!showPassword}
             />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 10 }}>
+              <Feather name={showPassword ? "eye" : "eye-off"} size={20} color="#666" />
+            </TouchableOpacity>
           </View>
 
-          {/* Buttons */}
+{/* Buttons */}
           <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
             {loading ? (
               <ActivityIndicator size="large" color="white" />
@@ -172,14 +262,20 @@ export default function App() {
             <View style={styles.dividerLine} />
           </View>
 
-          <TouchableOpacity style={styles.googleButton}>
-            <Image
-              source={{
-                uri: "https://developers.google.com/identity/images/g-logo.png",
-              }}
-              style={styles.googleIcon}
-            />
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
+          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleSignUp} disabled={googleLoading}>
+            {googleLoading ? (
+              <ActivityIndicator size="small" color="#555" />
+            ) : (
+              <>
+                <Image
+                  source={{
+                    uri: "https://developers.google.com/identity/images/g-logo.png",
+                  }}
+                  style={styles.googleIcon}
+                />
+                <Text style={styles.googleButtonText}>Continue with Google</Text>
+              </>
+            )}
           </TouchableOpacity>
 
           <View style={styles.loginContainer}>
@@ -219,7 +315,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: "bold",
-    color: "#2e7d32", // A pleasant green color
+    color: "#2e7d32",
     marginBottom: 8,
     fontFamily: Platform.OS === "ios" ? "Avenir" : "Roboto",
   },
@@ -309,6 +405,5 @@ const styles = StyleSheet.create({
   googleIcon: {
     width: 28,
     height: 28,
-    // marginRight: 10,
   },
 });

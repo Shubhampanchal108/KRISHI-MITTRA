@@ -4,7 +4,7 @@ import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
-export const URL = 'http://172.29.96.1:5000';
+export const URL = 'http://192.168.1.7:5000';
 
 
 export default function Index() {
@@ -15,11 +15,23 @@ export default function Index() {
       try {
         const token = await AsyncStorage.getItem("token");
         const user = await AsyncStorage.getItem("name");
-        await AsyncStorage.multiSet([
-          ["weatherFetched", "false"],
-          ["adviceFetched", "false"],
-          ["sprayingAdviceFetched", "false"],
-        ]);
+
+        // Smart Daily Caching Check
+        const today = new Date().toDateString();
+        const lastFetchDate = await AsyncStorage.getItem("lastFetchDate");
+
+        if (lastFetchDate !== today) {
+          await AsyncStorage.multiSet([
+            ["weatherFetched", "false"],
+            ["adviceFetched", "false"],
+            ["sprayingAdviceFetched", "false"],
+            ["lastFetchDate", today],
+          ]);
+          console.log("New day detected! Resetting daily advice and weather fetch flags.");
+        } else {
+          console.log("Same day: keeping daily weather and advice cache.");
+        }
+
         await AsyncStorage.multiRemove(["chatHistory", "pestAdvice"]);
 
         setTimeout(() => {
