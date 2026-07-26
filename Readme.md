@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="./client/assets/images/logo.jpeg" alt="Krishi Mittra Logo" width="140" style="border-radius: 50%; border: 4px solid #2E7D32;" />
+  <img src="./client/assets/images/logo.jpeg" alt="Krishi Mittra Logo" width="140" style="border-radius: 100%; border: 4px solid #2E7D32;" />
 
   # 🌾 KRISHI MITTRA
   ### *Smart Farming || Smarter Future*
@@ -213,15 +213,6 @@ cd KRISHI-MITTRA
 ```bash
 cd Server
 npm install
-```
-
-Create a `.env` file inside `Server/`:
-```env
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/krishi_mittra
-JWT_SECRET=your_super_secret_jwt_key
-GROQ_API_KEY=your_groq_ai_api_key
-WEATHER_API_KEY=your_openweather_api_key
 ```
 
 Start the backend:
