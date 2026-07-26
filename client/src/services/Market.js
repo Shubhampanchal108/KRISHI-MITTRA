@@ -1,4 +1,5 @@
 import axios from 'axios';
+import logger from '../utils/logger';
 
 // data.gov.in API for current daily price of various commodities from various markets
 // Dataset: Current Daily Price of Various Commodities from Various Markets Mandi
@@ -79,7 +80,7 @@ export const fetchMandiPrices = async ({ state = '', commodity = '', district = 
       return records;
     }
   } catch (error) {
-    console.log('Mandi API request failed, using fallback:', error?.message);
+    logger.info('Mandi API request failed, using fallback:', error?.message);
   }
 
   // Filter fallback records by state and commodity

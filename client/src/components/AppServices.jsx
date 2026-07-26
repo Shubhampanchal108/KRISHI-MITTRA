@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
@@ -142,7 +143,7 @@ const AgriAISupport = () => {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 14,
+    marginVertical: -5,
   },
   sectionHeader: {
     marginBottom: 14,

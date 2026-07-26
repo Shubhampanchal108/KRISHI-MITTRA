@@ -417,7 +417,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 6,
-    marginBottom: 6,
   },
   scannerHeaderRow: {
     flexDirection: "row",

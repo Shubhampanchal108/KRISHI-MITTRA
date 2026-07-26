@@ -671,9 +671,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: Platform.OS === "ios" ? 0 : "8%",
+    marginTop: Platform.OS === "ios" ? 0 : "2%",
     paddingHorizontal: 16,
-    paddingVertical: -25,
+    paddingBottom: "-30%",
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#E8F5E9",
@@ -745,6 +745,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F4F8F4",
+    paddingTop: "-34%"
   },
 
   // Messages List

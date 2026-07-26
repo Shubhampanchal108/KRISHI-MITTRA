@@ -1,14 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View } from "react-native";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-
-export const URL = 'http://192.168.1.7:5000';
-
+import SplashScreen from "./src/components/SplashScreen";
+import logger from "./src/utils/logger";
+export const URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.7:5000';
 
 export default function Index() {
   const router = useRouter();
+  const [showSplash, setShowSplash] = useState(true);
+  const targetRouteRef = useRef("/login");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -27,29 +29,38 @@ export default function Index() {
             ["sprayingAdviceFetched", "false"],
             ["lastFetchDate", today],
           ]);
-          console.log("New day detected! Resetting daily advice and weather fetch flags.");
+          logger.info("New day detected! Resetting daily advice and weather fetch flags.");
         } else {
-          console.log("Same day: keeping daily weather and advice cache.");
+          logger.info("Same day: keeping daily weather and advice cache.");
         }
 
         await AsyncStorage.multiRemove(["chatHistory", "pestAdvice"]);
 
-        setTimeout(() => {
-          if (!token && !user) router.replace("/signUp");
-          else if (!token) router.replace("/login");
-          else router.replace("/Home");
-        }, 10);
+        if (!token && !user) {
+          targetRouteRef.current = "/signUp";
+        } else if (!token) {
+          targetRouteRef.current = "/login";
+        } else {
+          targetRouteRef.current = "/Home";
+        }
       } catch (e) {
-        console.log("Startup error:", e);
+        logger.error("Startup error:", e);
       }
     };
+
     checkUser();
-  }, [router]);
+  }, []);
+
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+    router.replace(targetRouteRef.current);
+  };
 
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      {/* <Welcome /> */}
+    <View style={{ flex: 1, backgroundColor: "#F4F8F4" }}>
+      {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
       <Toast />
     </View>
   );
 }
+

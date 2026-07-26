@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
   TextInput,
@@ -13,6 +12,7 @@ import {
   Platform,
   ActivityIndicator
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,6 +21,7 @@ import Toast from 'react-native-toast-message';
 import { Feather } from '@expo/vector-icons';
 import { URL } from '../App';
 import { useGoogleAuthPrompt, processGoogleAuthResponse } from '../src/services/firebase';
+import logger from '../src/utils/logger';
 
 const successMsg = (message) => {
   Toast.show({ type: 'success', text1: 'Success', text2: message });
@@ -127,12 +128,12 @@ const KrishiMittraLoginScreen = () => {
         }, 1500);
       }
     } catch (e) {
-      const msg = e.response?.data?.message || 'An error occurred. Please try again.';
+      const msg = e.response?.data?.message || 'Invalid credentials or login failure. Please check and try again.';
       errorMsg(msg);
       setLoading(false);
       setPhone('');
       setPassword('');
-      console.error('Login Error:', e);
+      logger.info('Login response:', msg);
     }
   };
 

@@ -1,4 +1,5 @@
 import axios from "axios";
+import logger from "../utils/logger";
 
 const WEATHER_KEY = process.env.EXPO_PUBLIC_WEATHER_KEY || "b1b15e88fa797225412429c1c50c122a1";
 
@@ -9,7 +10,7 @@ export async function getWeatherInfo(city) {
     const response = await axios.get(Weather_URL);
     return response.data;
   } catch (error) {
-    console.error("Error fetching weather data:", error?.message);
+    logger.error("Error fetching weather data:", error?.message);
     throw error;
   }
 }
@@ -21,7 +22,8 @@ export async function getForecastInfo(city) {
     const response = await axios.get(Forecast_URL);
     return response.data;
   } catch (error) {
-    console.error("Error fetching forecast data:", error?.message);
+    logger.error("Error fetching forecast data:", error?.message);
     return null;
   }
 }
+

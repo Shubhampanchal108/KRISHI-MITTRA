@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
+import { Text, TouchableOpacity, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter, usePathname } from "expo-router";
 
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
   tabButton: {
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 25,
+    marginBottom: "-4%",
   },
   label: {
     fontSize: 12,

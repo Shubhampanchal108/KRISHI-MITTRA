@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
@@ -48,7 +49,7 @@ export default HeaderTab;
 const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: "#F4F9F4",
-    paddingTop: "8%",
+    marginBottom: "-13%"
   },
   header: {
     flexDirection: "row",
