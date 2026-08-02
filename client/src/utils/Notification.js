@@ -4,8 +4,8 @@ import Toast from 'react-native-toast-message';
 const successMsg = (text1, text2) => {
   Toast.show({
     type: 'success',
-    text1: text1,
-    text2: text2
+    text1: text2 ? text1 : 'Success',
+    text2: text2 ? text2 : text1,
   });
 };
 
@@ -13,8 +13,8 @@ const successMsg = (text1, text2) => {
 const errorMsg = (text1, text2) => {
   Toast.show({
     type: 'error',
-    text1: text1,
-    text2: text2
+    text1: text2 ? text1 : 'Error',
+    text2: text2 ? text2 : text1,
   });
 };
 
@@ -22,8 +22,8 @@ const errorMsg = (text1, text2) => {
 const infoMsg = (text1, text2) => {
   Toast.show({
     type: 'info',
-    text1: text1,
-    text2: text2
+    text1: text2 ? text1 : 'Info',
+    text2: text2 ? text2 : text1,
   });
 };
 

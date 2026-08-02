@@ -103,6 +103,10 @@ export default function App() {
       errorMsg("Mobile number should not be less than 10 digits!");
       return;
     }
+    if (password.length < 8) {
+      errorMsg("Password must be at least 8 characters long!");
+      return;
+    }
     setLoading(true);
     try {
       // Validate state and district via LLM endpoint first

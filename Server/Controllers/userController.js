@@ -8,6 +8,10 @@ const signup = async (req, res) => {
   try {
     const { name, phone, email, password, district, state, securityQuestion, securityAnswer } = req.body;
 
+    if (password && password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long." });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({
       $or: [{ phone: phone || "___no_phone___" }, { email: email || "___no_email___" }]
@@ -147,7 +151,19 @@ const getSecurityQuestion = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "No user found with this Phone or Email." });
+      return res.status(404).json({ message: "Account not found with this Phone/Email." });
+    }
+
+    const hasAnswer = !!(
+      user.securityAnswer &&
+      user.securityAnswer.trim() !== "" &&
+      user.securityAnswer.trim().toLowerCase() !== "google_oauth"
+    );
+
+    if (!hasAnswer) {
+      return res.status(400).json({
+        message: "You didn't set a security question, so we are not able to recover your account.",
+      });
     }
 
     return res.status(200).json({
@@ -176,6 +192,18 @@ const resetPassword = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
+    }
+
+    const hasAnswer = !!(
+      user.securityAnswer &&
+      user.securityAnswer.trim() !== "" &&
+      user.securityAnswer.trim().toLowerCase() !== "google_oauth"
+    );
+
+    if (!hasAnswer) {
+      return res.status(400).json({
+        message: "You didn't set a security question, so we are not able to recover your account.",
+      });
     }
 
     const normalizedAnswer = securityAnswer.trim().toLowerCase();

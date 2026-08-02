@@ -30,6 +30,87 @@ import { errorMsg, successMsg } from "../src/utils/Notification";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+const cleanThinkingText = (text) => {
+  if (!text || typeof text !== "string") return "";
+  let cleaned = text;
+
+  // 1. Remove XML/HTML reasoning tags (<think>, <thought>, <reasoning>, <draft>, etc.)
+  cleaned = cleaned.replace(/<(think|thought|reasoning|draft)>[\s\S]*?<\/\1>/gi, "");
+  cleaned = cleaned.replace(/<(think|thought|reasoning|draft)>[\s\S]*/gi, "");
+  cleaned = cleaned.replace(/<\/?(think|thought|reasoning|draft)>/gi, "");
+
+  // 2. Extract after final markers like "Final Polish:", "Final Hindi Response Structure:", "Final Response:", etc.
+  const finalMarkerRegex = /(?:Final\s*(?:Polish|Hindi\s*Response\s*Structure|Hindi\s*Response|Response|Output|Version|Draft|Answer)?|अंतिम\s*उत्तर)\s*[:\-\u2013\u2014]?/gi;
+  let matches = [...cleaned.matchAll(finalMarkerRegex)];
+  if (matches.length > 0) {
+    const lastMatch = matches[matches.length - 1];
+    const afterMarker = cleaned.substring(lastMatch.index + lastMatch[0].length).trim();
+    if (afterMarker) {
+      cleaned = afterMarker;
+    }
+  }
+
+  // 3. Split into lines and filter out meta/reasoning lines
+  const lines = cleaned.split(/\r?\n/);
+  const filteredLines = [];
+
+  for (let line of lines) {
+    let trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // Skip lines with English translation arrows or bullet quotes e.g. - "The crop..." ->
+    if (/(?:->|=>|-->)/.test(trimmed) && /[a-zA-Z]/.test(trimmed)) continue;
+
+    // Skip meta headings, constraint checks, or reasoning intros
+    if (/^(?:Refining for|Checking constraints|Final Hindi Response Structure|The user likely wants|Let's combine|Internal Monologue|Drafting|Key points|My task|Constraints|Rules|Note|Translate|Candidate|Step \d+|Greeting|Context)/i.test(trimmed)) {
+      continue;
+    }
+    if (/^(?:-\s*)?(?:Pure Hindi|No Hinglish|No English|No reasoning tags|\w+\s*\?)\s*[:\?]?\s*(?:Yes|No|True|False|OK)?$/i.test(trimmed)) {
+      continue;
+    }
+
+    // Skip pure English lines that contain no Hindi (Devanagari) characters
+    const containsHindi = /[\u0900-\u097F]/.test(trimmed);
+    const containsEnglish = /[a-zA-Z]{3,}/.test(trimmed);
+    if (containsEnglish && !containsHindi) {
+      continue;
+    }
+
+    filteredLines.push(trimmed);
+  }
+
+  cleaned = filteredLines.join("\n").trim();
+
+  // 4. Remove outer brackets [...] or quotes "..." wrapping the text if present
+  if (cleaned.startsWith("[") && cleaned.endsWith("]")) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith('“') && cleaned.endsWith('”'))) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+
+  // 5. Remove markdown symbols (*, #, _, ~, `)
+  cleaned = cleaned.replace(/[*#_~`]/g, "").trim();
+
+  // 6. Clean up residual leading labels
+  cleaned = cleaned.replace(/^(?:Final Polish|Final Response|Final Output|Output|उत्तर|जवाब)\s*[:\-\u2013\u2014]?\s*/gi, "").trim();
+
+  // 7. Remove any trailing or leading bracket artifacts
+  cleaned = cleaned.replace(/^\[+|\]+$/g, "").trim();
+
+  // 8. Safeguard: if cleaning resulted in empty string but original text had Hindi, extract Hindi
+  if (!cleaned && text.trim().length > 0) {
+    const hindiMatch = text.match(/[\u0900-\u097F][\s\S]*/);
+    if (hindiMatch) {
+      cleaned = hindiMatch[0].replace(/<\/?(think|thought|reasoning|draft)>/gi, "").replace(/[*#_~`]/g, "").trim();
+    } else {
+      cleaned = text.replace(/<\/?(think|thought|reasoning|draft)>/gi, "").replace(/[*#_~`]/g, "").trim();
+    }
+  }
+
+  return cleaned;
+};
+
 const Pest = () => {
   // Session State
   const [currentSession, setCurrentSession] = useState(null);
@@ -380,7 +461,8 @@ const Pest = () => {
       <HeaderTab />
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior="padding"
+          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 95}
           style={{ flex: 1 }}
         >
           {/* Header Action Bar */}
@@ -598,6 +680,7 @@ const Pest = () => {
                     ref={scrollViewRef}
                     style={styles.chatScrollView}
                     contentContainerStyle={styles.chatContentContainer}
+                    keyboardShouldPersistTaps="handled"
                     onContentSizeChange={() =>
                       scrollViewRef.current?.scrollToEnd({ animated: true })
                     }
@@ -630,7 +713,7 @@ const Pest = () => {
                                 isUser ? styles.userMsgText : styles.assistantMsgText,
                               ]}
                             >
-                              {msg.content}
+                              {cleanThinkingText(msg.content)}
                             </Text>
                             <Text style={styles.msgTime}>
                               {new Date(msg.createdAt).toLocaleTimeString([], {
@@ -643,7 +726,7 @@ const Pest = () => {
                               <View style={styles.msgActions}>
                                 <TouchableOpacity
                                   style={styles.bubbleAction}
-                                  onPress={() => handleSpeech(msg.content, index)}
+                                  onPress={() => handleSpeech(cleanThinkingText(msg.content), index)}
                                 >
                                   <Ionicons
                                     name={activeSpeechIndex === index ? "volume-mute" : "volume-high"}
@@ -653,7 +736,7 @@ const Pest = () => {
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                   style={styles.bubbleAction}
-                                  onPress={() => copyToClipboard(msg.content)}
+                                  onPress={() => copyToClipboard(cleanThinkingText(msg.content))}
                                 >
                                   <Ionicons name="copy-outline" size={16} color="#555" />
                                 </TouchableOpacity>

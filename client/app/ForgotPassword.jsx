@@ -29,12 +29,13 @@ const SECURITY_QUESTIONS = [
 
 const ForgotPasswordScreen = () => {
   const router = useRouter();
-  const [step, setStep] = useState(1); // 1: Identify, 2: Security Answer & Reset Password
+  const [step, setStep] = useState(1); // 1: Identify, 2: Security Answer & Reset Password, 3: No Question Set Warning
   const [identifier, setIdentifier] = useState("");
   const [securityQuestion, setSecurityQuestion] = useState("");
   const [securityAnswer, setSecurityAnswer] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [noQuestionMessage, setNoQuestionMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Step 1: Fetch security question for identifier
@@ -45,6 +46,7 @@ const ForgotPasswordScreen = () => {
     }
 
     setLoading(true);
+    setNoQuestionMessage("");
     try {
       const response = await axios.post(`${URL}/api/main/get-security-question`, {
         identifier: identifier.trim(),
@@ -57,7 +59,15 @@ const ForgotPasswordScreen = () => {
       }
     } catch (e) {
       const msg = e.response?.data?.message || "Account not found with this Phone/Email.";
-      errorMsg(msg);
+      if (
+        e.response?.status === 400 &&
+        (msg.includes("didn't set") || msg.includes("No security question") || msg.includes("cannot recover"))
+      ) {
+        setNoQuestionMessage("You didn't set a security question, so we are not able to recover your account.");
+        setStep(3);
+      } else {
+        errorMsg(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -125,7 +135,9 @@ const ForgotPasswordScreen = () => {
             <Text style={styles.subtitle}>
               {step === 1
                 ? "Enter your Phone Number or Email to find your security question."
-                : "Answer your security question to set a new password."}
+                : step === 2
+                ? "Answer your security question to set a new password."
+                : "Account recovery status for this user."}
             </Text>
           </View>
 
@@ -152,7 +164,7 @@ const ForgotPasswordScreen = () => {
                 )}
               </TouchableOpacity>
             </View>
-          ) : (
+          ) : step === 2 ? (
             <View style={styles.form}>
               {/* Question Badge */}
               <View style={styles.questionCard}>
@@ -206,6 +218,30 @@ const ForgotPasswordScreen = () => {
 
               <TouchableOpacity style={styles.changeAccountLink} onPress={() => setStep(1)}>
                 <Text style={styles.changeAccountText}>Use a different Phone/Email</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.noQuestionCard}>
+              <View style={styles.warningIconCircle}>
+                <Feather name="alert-triangle" size={32} color="#D97706" />
+              </View>
+              <Text style={styles.noQuestionTitle}>Recovery Unavailable</Text>
+              <Text style={styles.noQuestionText}>
+                {noQuestionMessage || "You didn't set a security question, so we are not able to recover your account."}
+              </Text>
+
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => {
+                  setStep(1);
+                  setNoQuestionMessage("");
+                }}
+              >
+                <Text style={styles.actionButtonText}>Try another Phone / Email</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.changeAccountLink} onPress={() => router.replace("/login")}>
+                <Text style={styles.changeAccountText}>Back to Login</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -318,6 +354,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 3,
     marginTop: 6,
+    width: "100%",
   },
   actionButtonText: {
     color: "#FFFFFF",
@@ -332,6 +369,37 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#666",
     textDecorationLine: "underline",
+  },
+  noQuestionCard: {
+    backgroundColor: "#FFFBEB",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FDE68A",
+    width: "100%",
+  },
+  warningIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#FEF3C7",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 14,
+  },
+  noQuestionTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#92400E",
+    marginBottom: 8,
+  },
+  noQuestionText: {
+    fontSize: 14,
+    color: "#B45309",
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 20,
   },
 });
 

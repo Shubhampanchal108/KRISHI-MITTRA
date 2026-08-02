@@ -34,7 +34,135 @@ Required JSON format:
 1. If the image is not related to agriculture or plants (e.g. human face, building, random object):
 Set "cropName" to "Invalid", "diseaseName" to "Not a plant", "severity" to "N/A", "confidence": 0, "initialResponseText": "⚠️ यह चित्र कृषि या पौधों से संबंधित नहीं है। कृपया पौधे या फसल की पत्ती का स्पष्ट चित्र अपलोड करें।"
 2. Keep treatment and advice practical, concise, and clear for a farmer.
-3. STRICT LANGUAGE RULE: All diagnostic text fields, treatments, symptoms, and initialResponseText must be written ONLY in pure Hindi language (using Devanagari script). Do NOT use Hinglish (Latin letters) or English language.`;
+3. STRICT LANGUAGE RULE: All diagnostic text fields, treatments, symptoms, and initialResponseText must be written ONLY in pure Hindi language (using Devanagari script). Do NOT use Hinglish (Latin letters) or English language.
+4. CRITICAL RULE: Do NOT include any reasoning, internal monologue, thought process, or markdown thinking tags (<think>...</think>). Return ONLY standard JSON.`;
+
+function cleanDiagnosisText(text) {
+  if (!text || typeof text !== "string") return "";
+  let cleaned = text;
+  cleaned = cleaned.replace(/<(think|thought|reasoning|draft)>[\s\S]*?<\/\1>/gi, "");
+  cleaned = cleaned.replace(/<\/?(think|thought|reasoning|draft)>/gi, "");
+  cleaned = cleaned.replace(/[*#_~`]/g, "").trim();
+  return cleaned;
+}
+
+function cleanLLMResponse(text) {
+  if (!text || typeof text !== "string") return "";
+  let cleaned = text;
+
+  // 1. Remove XML/HTML reasoning tags (<think>, <thought>, <reasoning>, <draft>, etc.)
+  cleaned = cleaned.replace(/<(think|thought|reasoning|draft)>[\s\S]*?<\/\1>/gi, "");
+  cleaned = cleaned.replace(/<(think|thought|reasoning|draft)>[\s\S]*/gi, "");
+  cleaned = cleaned.replace(/<\/?(think|thought|reasoning|draft)>/gi, "");
+
+  // 2. Extract after final markers like "Final Polish:", "Final Hindi Response Structure:", "Final Response:", etc.
+  const finalMarkerRegex = /(?:Final\s*(?:Polish|Hindi\s*Response\s*Structure|Hindi\s*Response|Response|Output|Version|Draft|Answer)?|अंतिम\s*उत्तर)\s*[:\-\u2013\u2014]?/gi;
+  let matches = [...cleaned.matchAll(finalMarkerRegex)];
+  if (matches.length > 0) {
+    const lastMatch = matches[matches.length - 1];
+    const afterMarker = cleaned.substring(lastMatch.index + lastMatch[0].length).trim();
+    if (afterMarker) {
+      cleaned = afterMarker;
+    }
+  }
+
+  // 3. Split into lines and filter out meta/reasoning lines
+  const lines = cleaned.split(/\r?\n/);
+  const filteredLines = [];
+
+  for (let line of lines) {
+    let trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // Skip lines with English translation arrows or bullet quotes e.g. - "The crop..." ->
+    if (/(?:->|=>|-->)/.test(trimmed) && /[a-zA-Z]/.test(trimmed)) continue;
+
+    // Skip meta headings, constraint checks, or reasoning intros
+    if (/^(?:Refining for|Checking constraints|Final Hindi Response Structure|The user likely wants|Let's combine|Internal Monologue|Drafting|Key points|My task|Constraints|Rules|Note|Translate|Candidate|Step \d+|Greeting|Context)/i.test(trimmed)) {
+      continue;
+    }
+    if (/^(?:-\s*)?(?:Pure Hindi|No Hinglish|No English|No reasoning tags|\w+\s*\?)\s*[:\?]?\s*(?:Yes|No|True|False|OK)?$/i.test(trimmed)) {
+      continue;
+    }
+
+    // Skip pure English lines that contain no Hindi (Devanagari) characters
+    const containsHindi = /[\u0900-\u097F]/.test(trimmed);
+    const containsEnglish = /[a-zA-Z]{3,}/.test(trimmed);
+    if (containsEnglish && !containsHindi) {
+      continue;
+    }
+
+    filteredLines.push(trimmed);
+  }
+
+  cleaned = filteredLines.join("\n").trim();
+
+  // 4. Remove outer brackets [...] or quotes "..." wrapping the text if present
+  if (cleaned.startsWith("[") && cleaned.endsWith("]")) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith('“') && cleaned.endsWith('”'))) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+
+  // 5. Remove markdown symbols (*, #, _, ~, `)
+  cleaned = cleaned.replace(/[*#_~`]/g, "").trim();
+
+  // 6. Clean up residual leading labels
+  cleaned = cleaned.replace(/^(?:Final Polish|Final Response|Final Output|Output|उत्तर|जवाब)\s*[:\-\u2013\u2014]?\s*/gi, "").trim();
+
+  // 7. Remove any trailing or leading bracket artifacts
+  cleaned = cleaned.replace(/^\[+|\]+$/g, "").trim();
+
+  // 8. Safeguard: if cleaning resulted in empty string but original text had Hindi, extract Hindi
+  if (!cleaned && text.trim().length > 0) {
+    const hindiMatch = text.match(/[\u0900-\u097F][\s\S]*/);
+    if (hindiMatch) {
+      cleaned = hindiMatch[0].replace(/<\/?(think|thought|reasoning|draft)>/gi, "").replace(/[*#_~`]/g, "").trim();
+    } else {
+      cleaned = text.replace(/<\/?(think|thought|reasoning|draft)>/gi, "").replace(/[*#_~`]/g, "").trim();
+    }
+  }
+
+  return cleaned;
+}
+
+async function summarizeAndRefineWithTextLLM(rawText) {
+  if (!rawText || typeof rawText !== "string" || !rawText.trim()) return "";
+  try {
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content: `You are Krishi Mitra Summarizer & Refiner, an intelligent agricultural assistant.
+You are given a raw response from a vision AI model analyzing a farmer's crop image or answering a crop diagnosis question.
+Your job is to summarize and refine this response into a clean, concise, polite advice directly in pure Hindi language (Devanagari script) for the farmer.
+
+CRITICAL RULES:
+1. Extract ONLY useful, relevant agricultural/diagnostic details. Send only details worth sending. Do NOT send useless extra things or meta commentary.
+2. Respond ONLY in pure Hindi language using Devanagari script. Do NOT use Hinglish or English words.
+3. Filter out internal monologue, thought processes, reasoning tags (<think>...</think>), draft steps, constraint lists, English translation bullets, or headers like "Final Polish:".
+4. Provide ONLY the final clean, direct Hindi summary/advice directly to the farmer.`
+        },
+        {
+          role: "user",
+          content: `Here is the raw vision response to summarize and refine:\n\n${rawText}`
+        }
+      ],
+      temperature: 0.3,
+      max_completion_tokens: 500,
+    });
+
+    const refined = response.choices[0]?.message?.content?.trim();
+    if (refined) {
+      return cleanLLMResponse(refined);
+    }
+  } catch (err) {
+    console.error("Error in summarizeAndRefineWithTextLLM (llama-3.3-70b-versatile):", err);
+  }
+  return cleanLLMResponse(rawText);
+}
 
 function getMimeType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -89,8 +217,8 @@ const startScan = async (req, res) => {
     const rawText = response.choices[0]?.message?.content || "";
     console.log("Raw Vision Response (truncated):", rawText.slice(0, 300));
 
-    // Strip <think>...</think> reasoning blocks emitted by qwen models
-    const strippedText = rawText.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+    // Strip <think>...</think> and reasoning blocks emitted by qwen models
+    const strippedText = cleanDiagnosisText(rawText);
 
     let parsedResult = null;
 
@@ -135,21 +263,46 @@ const startScan = async (req, res) => {
       console.error("All JSON extraction attempts failed. Raw output snippet:", rawText.slice(0, 500));
     }
 
-    if (!parsedResult) {
+    if (parsedResult) {
+      // Top-level fallback mapping if diagnosis object is nested differently
+      if (!parsedResult.diagnosis && (parsedResult.symptoms || parsedResult.organicTreatment || parsedResult.causes)) {
+        parsedResult.diagnosis = {
+          symptoms: parsedResult.symptoms || "",
+          causes: parsedResult.causes || "",
+          organicTreatment: parsedResult.organicTreatment || "",
+          chemicalTreatment: parsedResult.chemicalTreatment || "",
+          preventativeMeasures: parsedResult.preventativeMeasures || "",
+          precautions: parsedResult.precautions || ""
+        };
+      }
+
+      if (parsedResult.initialResponseText) {
+        parsedResult.initialResponseText = await summarizeAndRefineWithTextLLM(parsedResult.initialResponseText);
+      }
+
+      if (parsedResult.diagnosis) {
+        for (const k in parsedResult.diagnosis) {
+          if (typeof parsedResult.diagnosis[k] === "string") {
+            parsedResult.diagnosis[k] = cleanDiagnosisText(parsedResult.diagnosis[k]);
+          }
+        }
+      }
+    } else {
+      const defaultText = cleanLLMResponse(strippedText) || "AI scan is complete. What follow-up questions do you have about this crop?";
       parsedResult = {
-        cropName: "Crop analyzed",
-        diseaseName: "Symptoms detected",
-        confidence: 75,
+        cropName: "फसल का नाम",
+        diseaseName: "लक्षण पहचाने गए",
+        confidence: 80,
         severity: "Moderate",
         diagnosis: {
-          symptoms: "Leaf spots, discoloration, or pest damage observed.",
-          causes: "Fungal, bacterial, or pest vectors under humid/warm conditions.",
-          organicTreatment: "Apply neem oil spray, compost tea, or remove infected leaves manually.",
-          chemicalTreatment: "Apply general broad-spectrum fungicide or crop-safe insecticide.",
-          preventativeMeasures: "Maintain proper soil aeration and crop rotation practices.",
-          precautions: "Clean all tools after handling infected crop elements."
+          symptoms: "पत्तियों में पीलापन, धब्बे या कीट के लक्षण दिखाई दे रहे हैं।",
+          causes: "फंगल या बैक्टीरियल संक्रमण तथा मौसम की नमी के कारण।",
+          organicTreatment: "नीम के तेल (Neem Oil) का छिड़काव करें और संक्रमित पत्तियों को हटा दें।",
+          chemicalTreatment: "कॉपर ऑक्सीक्लोराइड या उचित फफूंदनाशक का छिड़काव करें।",
+          preventativeMeasures: "खेत में जल निकासी और सही फसल चक्र बनाए रखें।",
+          precautions: "छिड़काव करते समय दस्ताने और मास्क का प्रयोग करें।"
         },
-        initialResponseText: rawText || "AI scan is complete. What follow-up questions do you have about this crop?"
+        initialResponseText: await summarizeAndRefineWithTextLLM(defaultText)
       };
     }
 
@@ -248,11 +401,19 @@ A farmer has uploaded a picture of their crop. Here is the context of that crop:
 - Chemical Treatments: ${session.diagnosis.chemicalTreatment}${farmerContextText}
 
 Always answer the user's questions about this plant or agricultural topic, referring to their specific soil, location, and plant condition if applicable.
-STRICT RULE: You must respond ONLY in pure Hindi language using Devanagari script. Do NOT use Hinglish (Latin/Hindi hybrid script or spelling like "aap", "kheti", "pani") and do NOT use English language. Every single word in your response must be in standard Devanagari Hindi script.`;
+STRICT RULE: You must respond ONLY in pure Hindi language using Devanagari script. Do NOT use Hinglish (Latin/Hindi hybrid script or spelling like "aap", "kheti", "pani") and do NOT use English language. Every single word in your response must be in standard Devanagari Hindi script.
+CRITICAL OUTPUT RULE: Do NOT include any internal thoughts, chain-of-thought, reasoning, planning, self-correction notes, translation steps, English explanations, or markdown thinking tags (<think>...</think>). Do NOT output labels such as "Final Polish:", "Refining for:", "Checking constraints:", or translation bullet points. Output ONLY the clean final Hindi message text directly in Devanagari script without any wrapper or meta header.`;
+
+    // Sanitize any existing empty content fields in chatHistory to satisfy Mongoose schema
+    session.chatHistory.forEach((msg) => {
+      if (!msg.content || !msg.content.trim()) {
+        msg.content = "फसल जानकारी";
+      }
+    });
 
     const formattedHistory = session.chatHistory.map((msg) => ({
       role: msg.role,
-      content: msg.content,
+      content: cleanLLMResponse(msg.content) || msg.content,
     }));
 
     const messages = [{ role: "system", content: systemPrompt }];
@@ -283,11 +444,10 @@ STRICT RULE: You must respond ONLY in pure Hindi language using Devanagari scrip
     });
 
     const rawReply = response.choices[0]?.message?.content || "";
-    // Clean reply of special formatting chars if needed, but allow simple markdown
-    const replyText = rawReply.replace(
-      /[*#@!$%^&()_+={}[\]\\|;:'"<>/?~-]/g,
-      "",
-    );
+    // Step 2: Use ChatBot text model (llama-3.3-70b-versatile) to summarize and refine
+    const replyText =
+      (await summarizeAndRefineWithTextLLM(rawReply)) ||
+      "आपकी फसल के संबंध में यदि कोई और प्रश्न है, तो कृपया पूछें।";
 
     // Push messages to history
     session.chatHistory.push({ role: "user", content: query });

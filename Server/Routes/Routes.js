@@ -38,6 +38,8 @@ const { getChatHistoryByUserId, addChatHistory, deleteChatHistoryById } = requir
 
 const {addFeedback, deleteFeedback, getAllFeedback} = require('../Controllers/FeedbackController')
 
+const { getNews } = require('../Controllers/newsController')
+
 //user routes
 Router.post("/signup", signup);
 Router.post("/login", login);
@@ -77,5 +79,8 @@ Router.post('/pestdetection', upload.single("image"), pestDetection)
 Router.post("/feedback/add", addFeedback);
 Router.get("/feedback/get", getAllFeedback);
 Router.delete("/feedback/delete/:id", deleteFeedback);
+
+//News routes
+Router.get("/news", getNews);
 
 module.exports = Router;

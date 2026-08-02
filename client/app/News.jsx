@@ -10,94 +10,16 @@ import {
   SafeAreaView,
   TextInput,
   Platform,
+  ActivityIndicator,
+  Image,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { URL as API_BASE_URL } from "../App";
 
-// Hardcoded agriculture news fallback (always loads fast)
-const FALLBACK_NEWS = [
-  {
-    id: "1",
-    title: "PM Kisan Samman Nidhi: Next Installment Expected in August 2025",
-    description:
-      "The government is set to release the next installment of PM-KISAN scheme, directly crediting ₹2000 to millions of farmers' accounts across India.",
-    url: "https://pmkisan.gov.in",
-    publishedAt: "2025-07-20",
-    source: "Agricultural Ministry",
-    category: "Scheme",
-  },
-  {
-    id: "2",
-    title:
-      "Kharif Sowing Season: Farmers Report Good Progress Amid Normal Monsoon",
-    description:
-      "Agriculture officials report that kharif sowing is progressing well with paddy, soybean, and cotton witnessing healthy coverage due to timely monsoon rains.",
-    url: "https://pib.gov.in",
-    publishedAt: "2025-07-18",
-    source: "PIB India",
-    category: "Farming",
-  },
-  {
-    id: "3",
-    title: "MSP for Kharif Crops 2025-26 Announced by Cabinet",
-    description:
-      "The Cabinet Committee on Economic Affairs has approved a significant hike in Minimum Support Price (MSP) for paddy, arhar dal, and other kharif crops.",
-    url: "https://agriculture.gov.in",
-    publishedAt: "2025-07-15",
-    source: "CCEA",
-    category: "Policy",
-  },
-  {
-    id: "4",
-    title: "Organic Farming Zones to be Established in 10 New States",
-    description:
-      "The Ministry of Agriculture has announced plans to expand the Paramparagat Krishi Vikas Yojana to promote organic farming in clusters across 10 new states.",
-    url: "https://pgsindia-ncof.gov.in",
-    publishedAt: "2025-07-10",
-    source: "NCOF India",
-    category: "Organic",
-  },
-  {
-    id: "5",
-    title: "Drip Irrigation Subsidy Scheme Gets ₹5000 Crore Boost",
-    description:
-      "The government has allocated additional funds under PMKSY to support micro-irrigation infrastructure, helping small farmers adopt water-efficient technologies.",
-    url: "https://pmksy.gov.in",
-    publishedAt: "2025-07-08",
-    source: "PMKSY",
-    category: "Irrigation",
-  },
-  {
-    id: "6",
-    title: "Soil Health Cards to be Upgraded with AI-Based Analysis",
-    description:
-      "A new initiative to digitize and use AI-based analysis for Soil Health Cards will help farmers get more precise fertilizer recommendations tailored to their land.",
-    url: "https://soilhealth.dac.gov.in",
-    publishedAt: "2025-07-05",
-    source: "Soil Health Portal",
-    category: "Technology",
-  },
-  {
-    id: "7",
-    title: "Fasal Bima Yojana: Claim Settlement Speeded Up via Mobile App",
-    description:
-      "PMFBY announces integration with mobile claim settlement — farmers can now submit crop loss reports directly via smartphone within 72 hours of a calamity.",
-    url: "https://pmfby.gov.in",
-    publishedAt: "2025-07-02",
-    source: "PMFBY",
-    category: "Insurance",
-  },
-  {
-    id: "8",
-    title: "Agri-Export Zones: 12 New Clusters Approved for Horticulture",
-    description:
-      "The APEDA has approved 12 new agricultural export clusters for fruits, vegetables and spices to boost farmer income through global market access.",
-    url: "https://apeda.gov.in",
-    publishedAt: "2025-06-28",
-    source: "APEDA",
-    category: "Export",
-  },
-];
+// News endpoint — uses the same base URL as the rest of the app
+const NEWS_API_URL = `${API_BASE_URL}/api/main/news`;
 
 const CATEGORIES = [
   "All",
@@ -123,17 +45,83 @@ const categoryColors = {
   All: { bg: "#E8F5E9", text: "#2E7D32" },
 };
 
+const CATEGORY_IMAGES = {
+  Scheme:
+    "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600&auto=format&fit=crop&q=80",
+  Farming:
+    "https://media.istockphoto.com/id/2206670602/photo/rural-indian-farmer-standing-in-agriculture-wheat-farm-and-looking-into-the-distant.webp?a=1&b=1&s=612x612&w=0&k=20&c=4jWdLQYAoBKLTwpDYv77dXftaJH-iT39Kxigkzwvj5g=",
+  Policy:
+    "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&auto=format&fit=crop&q=80",
+  Organic:
+    "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=600&auto=format&fit=crop&q=80",
+  Irrigation:
+    "https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0?w=600&auto=format&fit=crop&q=80",
+  Technology:
+    "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?w=600&auto=format&fit=crop&q=80",
+  Insurance:
+    "https://images.unsplash.com/photo-1450133064473-71024230f91b?w=600&auto=format&fit=crop&q=80",
+  Export:
+    "https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=600&auto=format&fit=crop&q=80",
+  All:
+    "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=600&auto=format&fit=crop&q=80",
+};
+
 const NewsScreen = () => {
   const router = useRouter();
-  const [news, setNews] = useState(FALLBACK_NEWS);
-  const [filteredNews, setFilteredNews] = useState(FALLBACK_NEWS);
+  const [allNews, setAllNews] = useState([]);
+  const [filteredNews, setFilteredNews] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState(null);
+  const [dataSource, setDataSource] = useState(""); // 'live' | 'fallback'
+
+  const fetchNews = useCallback(async (showRefreshing = false) => {
+    if (showRefreshing) setRefreshing(true);
+    else setLoading(true);
+    setError(null);
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+
+      const response = await fetch(NEWS_API_URL, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
+      }
+
+      const json = await response.json();
+
+      if (json.success && Array.isArray(json.news) && json.news.length > 0) {
+        setAllNews(json.news);
+        setDataSource("live");
+      } else {
+        throw new Error("Empty response from server");
+      }
+    } catch (err) {
+      console.warn("News fetch failed, using fallback:", err.message);
+      setError("Could not load live news. Showing cached articles.");
+      setAllNews(FALLBACK_NEWS);
+      setDataSource("fallback");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  // Fetch on mount
+  useEffect(() => {
+    fetchNews();
+  }, [fetchNews]);
 
   // Filter logic
   useEffect(() => {
-    let result = news;
+    let result = allNews;
     if (selectedCategory !== "All") {
       result = result.filter((item) => item.category === selectedCategory);
     }
@@ -141,22 +129,19 @@ const NewsScreen = () => {
       result = result.filter(
         (item) =>
           item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchQuery.toLowerCase()),
+          item.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     setFilteredNews(result);
-  }, [selectedCategory, searchQuery, news]);
+  }, [selectedCategory, searchQuery, allNews]);
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    // Refresh from cache or show latest hardcoded data
-    await new Promise((r) => setTimeout(r, 800));
-    setNews([...FALLBACK_NEWS].reverse());
-    setRefreshing(false);
-  }, []);
+  const onRefresh = useCallback(() => {
+    fetchNews(true);
+  }, [fetchNews]);
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
     return date.toLocaleDateString("en-IN", {
       day: "numeric",
       month: "short",
@@ -164,50 +149,114 @@ const NewsScreen = () => {
     });
   };
 
-  const openLink = (url) => {
-    Linking.openURL(url).catch(() => {});
+  const cleanText = (text) => {
+    if (!text) return "";
+    return text
+      .replace(/<[^>]*>?/gm, "")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, " ")
+      .trim();
   };
 
-  const renderNewsCard = ({ item, index }) => {
-    const catColor = categoryColors[item.category] || categoryColors.All;
+  const openLink = async (url) => {
+    if (!url) return;
+    try {
+      await WebBrowser.openBrowserAsync(url);
+    } catch {
+      Linking.openURL(url).catch(() => {});
+    }
+  };
+
+  const renderNewsCard = ({ item }) => {
+    const catName = item.category || "Farming";
+    const catColor = categoryColors[catName] || categoryColors.All;
+    const cleanTitle = cleanText(item.title);
+    const cleanDesc = cleanText(item.description);
+    const imageUri =
+      item.imageUrl || CATEGORY_IMAGES[catName] || CATEGORY_IMAGES.All;
+
     return (
       <TouchableOpacity
         style={styles.newsCard}
         activeOpacity={0.88}
         onPress={() => openLink(item.url)}
       >
-        <View style={styles.cardHeader}>
+        <View style={styles.cardImageContainer}>
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.cardImage}
+            resizeMode="cover"
+          />
           <View
-            style={[styles.categoryBadge, { backgroundColor: catColor.bg }]}
+            style={[styles.categoryBadgeOverlay, { backgroundColor: catColor.bg }]}
           >
             <Text style={[styles.categoryText, { color: catColor.text }]}>
-              {item.category}
+              {catName}
             </Text>
           </View>
-          <Text style={styles.dateText}>{formatDate(item.publishedAt)}</Text>
         </View>
 
-        <Text style={styles.newsTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-
-        <Text style={styles.newsDescription} numberOfLines={3}>
-          {item.description}
-        </Text>
-
-        <View style={styles.cardFooter}>
-          <View style={styles.sourceContainer}>
-            <Ionicons name="newspaper-outline" size={13} color="#4CAF50" />
-            <Text style={styles.sourceText}>{item.source}</Text>
+        <View style={styles.cardBody}>
+          <View style={styles.cardHeader}>
+            <View style={styles.dateContainer}>
+              <Ionicons name="calendar-outline" size={13} color="#888" style={{ marginRight: 4 }} />
+              <Text style={styles.dateText}>{formatDate(item.publishedAt)}</Text>
+            </View>
           </View>
-          <View style={styles.readMoreBtn}>
-            <Text style={styles.readMoreText}>Read More</Text>
-            <Ionicons name="arrow-forward" size={13} color="#2E7D32" />
+
+          <Text style={styles.newsTitle} numberOfLines={2}>
+            {cleanTitle}
+          </Text>
+
+          <Text style={styles.newsDescription} numberOfLines={3}>
+            {cleanDesc}
+          </Text>
+
+          <View style={styles.cardFooter}>
+            <View style={styles.sourceContainer}>
+              <Ionicons name="newspaper-outline" size={13} color="#4CAF50" />
+              <Text style={styles.sourceText} numberOfLines={1}>
+                {cleanText(item.source)}
+              </Text>
+            </View>
+            <View style={styles.readMoreBtn}>
+              <Text style={styles.readMoreText}>Read More</Text>
+              <Ionicons name="arrow-forward" size={13} color="#2E7D32" />
+            </View>
           </View>
         </View>
       </TouchableOpacity>
     );
   };
+
+  // Loading skeleton
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <SafeAreaView style={styles.header}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#1B5E20" />
+          </TouchableOpacity>
+          <View style={styles.headerTitleContainer}>
+            <MaterialIcons name="article" size={22} color="#1B5E20" />
+            <Text style={styles.headerTitle}>Agriculture News</Text>
+          </View>
+          <View style={{ width: 36 }} />
+        </SafeAreaView>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+          <Text style={styles.loadingText}>Fetching latest news...</Text>
+          <Text style={styles.loadingSubText}>
+            Powered by Google News RSS
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -248,7 +297,37 @@ const NewsScreen = () => {
         )}
       </View>
 
-     
+      {/* Category chips */}
+      <FlatList
+        data={CATEGORIES}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={(item) => String(item)}
+        style={{ flexGrow: 0 }}
+        contentContainerStyle={styles.categoryList}
+        renderItem={({ item }) => {
+          const isActive = selectedCategory === item;
+          return (
+            <TouchableOpacity
+              style={[
+                styles.categoryChip,
+                isActive && styles.categoryChipActive,
+              ]}
+              onPress={() => setSelectedCategory(item)}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.categoryChipText,
+                  isActive && styles.categoryChipTextActive,
+                ]}
+              >
+                {String(item)}
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
+      />
 
       {/* News Count */}
       <View style={styles.countRow}>
@@ -293,6 +372,7 @@ const NewsScreen = () => {
 };
 
 export default NewsScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -341,8 +421,64 @@ const styles = StyleSheet.create({
     color: "#1B5E20",
   },
 
-  headerSpacer: {
-    width: 40,
+  liveBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E8F5E9",
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: "#C8E6C9",
+  },
+
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#4CAF50",
+    marginRight: 7,
+  },
+
+  liveBannerText: {
+    fontSize: 12,
+    color: "#2E7D32",
+    fontWeight: "600",
+  },
+
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF3E0",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#FFE0B2",
+    gap: 6,
+  },
+
+  errorBannerText: {
+    fontSize: 12,
+    color: "#E65100",
+    flex: 1,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+  },
+
+  loadingText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#2E7D32",
+    marginTop: 8,
+  },
+
+  loadingSubText: {
+    fontSize: 13,
+    color: "#888",
   },
 
   searchContainer: {
@@ -376,6 +512,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     paddingBottom: 6,
+    marginBottom: "6%",
   },
 
   categoryChip: {
@@ -384,10 +521,11 @@ const styles = StyleSheet.create({
     borderColor: "#D6E4D6",
     borderRadius: 22,
     paddingHorizontal: 16,
-    paddingVertical: 9,
+    paddingVertical: 8,
     marginRight: 10,
     justifyContent: "center",
     alignItems: "center",
+    minHeight: 36,
   },
 
   categoryChipActive: {
@@ -396,9 +534,10 @@ const styles = StyleSheet.create({
   },
 
   categoryChipText: {
-    color: "#555",
+    color: "#1B5E20",
     fontSize: 13,
     fontWeight: "600",
+    includeFontPadding: false,
   },
 
   categoryChipTextActive: {
@@ -450,10 +589,10 @@ const styles = StyleSheet.create({
   newsCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
-    borderLeftWidth: 5,
-    borderLeftColor: "#4CAF50",
+    marginBottom: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#E8F0E8",
 
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
@@ -462,11 +601,47 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
 
+  cardImageContainer: {
+    width: "100%",
+    height: 155,
+    position: "relative",
+    backgroundColor: "#E8F5E9",
+  },
+
+  cardImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  categoryBadgeOverlay: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 16,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+
+  cardBody: {
+    padding: 16,
+  },
+
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 8,
+  },
+
+  dateContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 
   categoryBadge: {
@@ -514,6 +689,8 @@ const styles = StyleSheet.create({
   sourceContainer: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
+    marginRight: 8,
   },
 
   sourceText: {

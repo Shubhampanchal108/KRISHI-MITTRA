@@ -131,11 +131,11 @@ const PrivacyPolicy = () => {
               If you have any questions, concerns, or requests regarding this Privacy Policy or your personal data, please reach out to our support team:
             </Text>
             <Text style={[styles.cardBody, { fontWeight: "700", color: "#2E7D32", marginTop: 6 }]}>
-              📧 Email: support@krishimittra.in
+              📧 Email: krishimittra@gmail.com
             </Text>
           </View>
 
-          <View style={{ height: 30 }} />
+          {/* <View style={{ height: 30 }} /> */}
         </ScrollView>
       </View>
       <NavigationTab />

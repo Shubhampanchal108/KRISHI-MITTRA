@@ -138,11 +138,7 @@ const FeedbackModal = ({ visible, onClose, onSubmit }) => {
 
   const charProgress = charCount / MAX_CHARS;
   const charColor =
-    charProgress > 0.9
-      ? "#EF4444"
-      : charProgress > 0.7
-      ? "#F59E0B"
-      : "#22C55E";
+    charProgress > 0.9 ? "#EF4444" : charProgress > 0.7 ? "#F59E0B" : "#22C55E";
 
   return (
     <Modal
@@ -262,24 +258,25 @@ const FeedbackModal = ({ visible, onClose, onSubmit }) => {
               {/* Quick suggestion chips */}
               <Text style={styles.chipLabel}>Quick Tags</Text>
               <View style={styles.chipRow}>
-                {["🐛 Bug Report", "💡 Suggestion", "👍 Praise", "🎨 UI Issue"].map(
-                  (chip) => (
-                    <TouchableOpacity
-                      key={chip}
-                      style={styles.chip}
-                      onPress={() =>
-                        handleFeedbackChange(
-                          feedback
-                            ? `${feedback} ${chip}`
-                            : `${chip} `
-                        )
-                      }
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.chipText}>{chip}</Text>
-                    </TouchableOpacity>
-                  )
-                )}
+                {[
+                  "🐛 Bug Report",
+                  "💡 Suggestion",
+                  "👍 Praise",
+                  "🎨 UI Issue",
+                ].map((chip) => (
+                  <TouchableOpacity
+                    key={chip}
+                    style={styles.chip}
+                    onPress={() =>
+                      handleFeedbackChange(
+                        feedback ? `${feedback} ${chip}` : `${chip} `,
+                      )
+                    }
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.chipText}>{chip}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
 
               {/* Buttons */}

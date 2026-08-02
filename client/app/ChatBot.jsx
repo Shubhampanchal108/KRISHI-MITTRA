@@ -27,6 +27,25 @@ import { speak, stopTTS } from "../src/utils/TTS";
 
 const SIDEBAR_WIDTH = 300;
 
+const cleanThinkingText = (text) => {
+  if (!text || typeof text !== "string") return "";
+  let cleaned = text;
+  cleaned = cleaned.replace(/<(think|thought|reasoning)>[\s\S]*?<\/\1>/gi, "");
+  cleaned = cleaned.replace(/<(think|thought|reasoning)>[\s\S]*/gi, "");
+  cleaned = cleaned.replace(/<\/?(think|thought|reasoning)>/gi, "");
+  if (/(?:internal monologue|drafting the response|key points to include|final check against constraints|my task is to)/i.test(cleaned)) {
+    const hindiMatch = cleaned.match(/[\u0900-\u097F]/);
+    if (hindiMatch) {
+      const firstHindiIdx = hindiMatch.index;
+      const textBefore = cleaned.substring(0, firstHindiIdx);
+      if (/(?:internal monologue|drafting|task|context|greeting|key points|constraints|monologue)/i.test(textBefore)) {
+        cleaned = cleaned.substring(firstHindiIdx);
+      }
+    }
+  }
+  return cleaned.replace(/[*#_~`]/g, "").trim();
+};
+
 const SUGGESTED_PROMPTS = [
   {
     icon: "leaf-outline",
@@ -370,7 +389,7 @@ const Chatbot = () => {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 5}
       >
         <SafeAreaView style={styles.container}>
           {/* Dropdown Menu */}
@@ -419,7 +438,7 @@ const Chatbot = () => {
 
                   <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.botBubble]}>
                     <Text style={[styles.messageText, isUser ? styles.userText : styles.botText]}>
-                      {item.text}
+                      {cleanThinkingText(item.text)}
                     </Text>
 
                     <View style={styles.msgFooter}>
@@ -431,7 +450,7 @@ const Chatbot = () => {
                         <View style={styles.msgActionRow}>
                           <TouchableOpacity
                             style={styles.msgActionBtn}
-                            onPress={() => handleSpeech(item.text, item.id)}
+                            onPress={() => handleSpeech(cleanThinkingText(item.text), item.id)}
                           >
                             <Ionicons
                               name={activeSpeechId === item.id ? "volume-mute" : "volume-high-outline"}
@@ -441,7 +460,7 @@ const Chatbot = () => {
                           </TouchableOpacity>
                           <TouchableOpacity
                             style={styles.msgActionBtn}
-                            onPress={() => copyToClipboard(item.text)}
+                            onPress={() => copyToClipboard(cleanThinkingText(item.text))}
                           >
                             <Ionicons name="copy-outline" size={15} color="#555" />
                           </TouchableOpacity>

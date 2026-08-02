@@ -22,6 +22,7 @@ import { useRouter } from "expo-router";
 import FeedbackModal from "../src/components/Modal";
 import EditProfileModal from "../src/components/EditProfile";
 import SoilDataModal from "../src/components/SoilData";
+import ViewSoilModal from "../src/components/ViewSoilModal";
 import Toast from "react-native-toast-message";
 
 const Profile = () => {
@@ -30,6 +31,7 @@ const Profile = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [soilModalVisible, setSoilModalVisible] = useState(false);
+  const [viewSoilModalVisible, setViewSoilModalVisible] = useState(false);
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [initialData, setInitialData] = useState({
     name: "Farmer",
@@ -140,7 +142,7 @@ const Profile = () => {
 
             <TouchableOpacity
               style={styles.metricCard}
-              onPress={() => setSoilModalVisible(true)}
+              onPress={() => setViewSoilModalVisible(true)}
               activeOpacity={0.8}
             >
               <View style={[styles.metricIconCircle, { backgroundColor: "#FFF8E1" }]}>
@@ -181,7 +183,7 @@ const Profile = () => {
 
             <TouchableOpacity
               style={styles.itemRow}
-              onPress={() => setSoilModalVisible(true)}
+              onPress={() => setViewSoilModalVisible(true)}
               activeOpacity={0.7}
             >
               <View style={[styles.itemIconBox, { backgroundColor: "#F1F8E9" }]}>
@@ -303,10 +305,22 @@ const Profile = () => {
             initialData={initialData}
           />
 
+          <ViewSoilModal
+            visible={viewSoilModalVisible}
+            onClose={() => setViewSoilModalVisible(false)}
+            onEdit={() => {
+              setViewSoilModalVisible(false);
+              setSoilModalVisible(true);
+            }}
+          />
+
           <SoilDataModal
             visible={soilModalVisible}
             onClose={() => setSoilModalVisible(false)}
-            onSuccess={() => successMsg("✅ Soil data saved!", "Your soil information has been updated.")}
+            onSuccess={() => {
+              successMsg("✅ Soil data saved!", "Your soil information has been updated.");
+              setViewSoilModalVisible(true);
+            }}
           />
 
           {/* Logout Confirmation Modal */}

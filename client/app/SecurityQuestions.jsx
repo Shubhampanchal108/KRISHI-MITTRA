@@ -141,7 +141,11 @@ export default function SecurityQuestionsScreen() {
   };
 
   const handleSkip = () => {
-    Router.replace("/Home");
+    if (paramUserId) {
+      Router.replace("/Home");
+    } else {
+      Router.back();
+    }
   };
 
   const handleEditConfirmed = () => {
@@ -346,7 +350,9 @@ export default function SecurityQuestionsScreen() {
         </TouchableOpacity>
       ) : (
         <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
-          <Text style={styles.skipText}>Skip for now</Text>
+          <Text style={styles.skipText}>
+            {paramUserId ? "Skip for now" : "← Go Back"}
+          </Text>
         </TouchableOpacity>
       )}
     </View>

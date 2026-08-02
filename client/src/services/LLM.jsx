@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { buildSystemInstruction, Weather_INS_LLM } from "./instruction";
+import { buildSystemInstruction, getWeatherInstruction } from "./instruction";
 import { fetchFarmerContext } from "./farmerContext";
 
 const apiKey = process.env.EXPO_PUBLIC_GROQ_KEY;
@@ -28,6 +28,87 @@ async function getChatHistory() {
     console.log("Error loading chat history:", error);
     return [];
   }
+}
+
+export function cleanLLMResponse(text) {
+  if (!text || typeof text !== "string") return "";
+  let cleaned = text;
+
+  // 1. Remove XML/HTML reasoning tags (<think>, <thought>, <reasoning>, <draft>, etc.)
+  cleaned = cleaned.replace(/<(think|thought|reasoning|draft)>[\s\S]*?<\/\1>/gi, "");
+  cleaned = cleaned.replace(/<(think|thought|reasoning|draft)>[\s\S]*/gi, "");
+  cleaned = cleaned.replace(/<\/?(think|thought|reasoning|draft)>/gi, "");
+
+  // 2. Extract after final markers like "Final Polish:", "Final Hindi Response Structure:", "Final Response:", etc.
+  const finalMarkerRegex = /(?:Final\s*(?:Polish|Hindi\s*Response\s*Structure|Hindi\s*Response|Response|Output|Version|Draft|Answer)?|अंतिम\s*उत्तर)\s*[:\-\u2013\u2014]?/gi;
+  let matches = [...cleaned.matchAll(finalMarkerRegex)];
+  if (matches.length > 0) {
+    const lastMatch = matches[matches.length - 1];
+    const afterMarker = cleaned.substring(lastMatch.index + lastMatch[0].length).trim();
+    if (afterMarker) {
+      cleaned = afterMarker;
+    }
+  }
+
+  // 3. Split into lines and filter out meta/reasoning lines
+  const lines = cleaned.split(/\r?\n/);
+  const filteredLines = [];
+
+  for (let line of lines) {
+    let trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // Skip lines with English translation arrows or bullet quotes e.g. - "The crop..." ->
+    if (/(?:->|=>|-->)/.test(trimmed) && /[a-zA-Z]/.test(trimmed)) continue;
+
+    // Skip meta headings, constraint checks, or reasoning intros
+    if (/^(?:Refining for|Checking constraints|Final Hindi Response Structure|The user likely wants|Let's combine|Internal Monologue|Drafting|Key points|My task|Constraints|Rules|Note|Translate|Candidate|Step \d+|Greeting|Context)/i.test(trimmed)) {
+      continue;
+    }
+    if (/^(?:-\s*)?(?:Pure Hindi|No Hinglish|No English|No reasoning tags|\w+\s*\?)\s*[:\?]?\s*(?:Yes|No|True|False|OK)?$/i.test(trimmed)) {
+      continue;
+    }
+
+    // Skip pure English lines that contain no Hindi (Devanagari) characters
+    const containsHindi = /[\u0900-\u097F]/.test(trimmed);
+    const containsEnglish = /[a-zA-Z]{3,}/.test(trimmed);
+    if (containsEnglish && !containsHindi) {
+      continue;
+    }
+
+    filteredLines.push(trimmed);
+  }
+
+  cleaned = filteredLines.join("\n").trim();
+
+  // 4. Remove outer brackets [...] or quotes "..." wrapping the text if present
+  if (cleaned.startsWith("[") && cleaned.endsWith("]")) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith('“') && cleaned.endsWith('”'))) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+
+  // 5. Remove markdown symbols (*, #, _, ~, `)
+  cleaned = cleaned.replace(/[*#_~`]/g, "").trim();
+
+  // 6. Clean up residual leading labels
+  cleaned = cleaned.replace(/^(?:Final Polish|Final Response|Final Output|Output|उत्तर|जवाब)\s*[:\-\u2013\u2014]?\s*/gi, "").trim();
+
+  // 7. Remove any trailing or leading bracket artifacts
+  cleaned = cleaned.replace(/^\[+|\]+$/g, "").trim();
+
+  // 8. Safeguard: if cleaning resulted in empty string but original text had Hindi, extract Hindi
+  if (!cleaned && text.trim().length > 0) {
+    const hindiMatch = text.match(/[\u0900-\u097F][\s\S]*/);
+    if (hindiMatch) {
+      cleaned = hindiMatch[0].replace(/<\/?(think|thought|reasoning|draft)>/gi, "").replace(/[*#_~`]/g, "").trim();
+    } else {
+      cleaned = text.replace(/<\/?(think|thought|reasoning|draft)>/gi, "").replace(/[*#_~`]/g, "").trim();
+    }
+  }
+
+  return cleaned;
 }
 
 /**
@@ -68,7 +149,7 @@ export async function LLM(query, providedContext = null) {
     }
 
     const rawText = data.choices[0]?.message?.content || "";
-    const text = rawText.replace(/[*#@!$%^&()_+={}[\]\\|;:'"<>/?~-]/g, "");
+    const text = cleanLLMResponse(rawText);
 
     // Save chat in history with Groq/OpenAI compatible format
     const newHistory = [
@@ -114,7 +195,7 @@ export async function WeatherLLM(data) {
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages: [
-          { role: "system", content: Weather_INS_LLM },
+          { role: "system", content: getWeatherInstruction() },
           { role: "user", content: promptUser },
         ],
         temperature: 0.7,
@@ -128,7 +209,7 @@ export async function WeatherLLM(data) {
     }
 
     const rawText = resData.choices[0]?.message?.content || "";
-    return rawText.replace(/[*#@!$%^&()_+={}[\]\\|;:'",<>/?~-]/g, "");
+    return cleanLLMResponse(rawText);
   } catch (err) {
     console.error("Error in WeatherLLM:", err);
     return "Unable to fetch weather advice right now.";

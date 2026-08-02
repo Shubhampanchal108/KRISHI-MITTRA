@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import SplashScreen from "./src/components/SplashScreen";
 import logger from "./src/utils/logger";
-export const URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.7:5000';
+export const URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.9:5000';
 
 export default function Index() {
   const router = useRouter();

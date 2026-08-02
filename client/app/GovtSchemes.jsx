@@ -12,6 +12,7 @@ import {
   Modal,
   ScrollView,
   StatusBar,
+  Image,
 } from "react-native";
 import { Ionicons, FontAwesome5, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -27,6 +28,7 @@ const GOVERNMENT_SCHEMES = [
     color: "#2E7D32",
     bgColor: "#E8F5E9",
     tagColor: "#4CAF50",
+    image: "https://images.unsplash.com/photo-1635174815612-fd9636f70146?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fEFncmljdWx0cnVlJTIwc2NoZW1lc3xlbnwwfHwwfHx8MA%3D%3D",
     benefit: "₹6,000 per year in 3 installments",
     eligibility: "Small & marginal farmers with cultivable land",
     description:
@@ -47,6 +49,7 @@ const GOVERNMENT_SCHEMES = [
     color: "#1565C0",
     bgColor: "#E3F2FD",
     tagColor: "#1976D2",
+    image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80",
     benefit: "Coverage for crop loss due to natural calamities",
     eligibility: "All farmers growing notified crops",
     description:
@@ -67,6 +70,7 @@ const GOVERNMENT_SCHEMES = [
     color: "#00838F",
     bgColor: "#E0F7FA",
     tagColor: "#00ACC1",
+    image: "https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0?auto=format&fit=crop&w=800&q=80",
     benefit: "Up to 55% subsidy on micro-irrigation systems",
     eligibility: "All farmers, especially small & marginal farmers",
     description:
@@ -87,6 +91,7 @@ const GOVERNMENT_SCHEMES = [
     color: "#558B2F",
     bgColor: "#F9FBE7",
     tagColor: "#7CB342",
+    image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=800&q=80",
     benefit: "Free soil testing & fertilizer recommendations",
     eligibility: "All farmers",
     description:
@@ -107,6 +112,7 @@ const GOVERNMENT_SCHEMES = [
     color: "#6A1B9A",
     bgColor: "#F3E5F5",
     tagColor: "#8E24AA",
+    image: "https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?auto=format&fit=crop&w=800&q=80",
     benefit: "₹50,000 per hectare over 3 years for organic farming",
     eligibility: "Farmers forming clusters of 50 acres (20 hectare)",
     description:
@@ -127,6 +133,7 @@ const GOVERNMENT_SCHEMES = [
     color: "#E65100",
     bgColor: "#FFF3E0",
     tagColor: "#FB8C00",
+    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80",
     benefit: "Short-term crop loans at 4% interest p.a.",
     eligibility: "Individual/JLG farmers, tenants, oral lessees",
     description:
@@ -147,6 +154,7 @@ const GOVERNMENT_SCHEMES = [
     color: "#F57F17",
     bgColor: "#FFF8E1",
     tagColor: "#FBC02D",
+    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80",
     benefit: "Subsidized seeds, fertilizers and training support",
     eligibility: "Farmers in notified districts growing rice, wheat, pulses, coarse grains",
     description:
@@ -167,6 +175,7 @@ const GOVERNMENT_SCHEMES = [
     color: "#880E4F",
     bgColor: "#FCE4EC",
     tagColor: "#C2185B",
+    image: "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=800&q=80",
     benefit: "Infrastructure development & agri-business support",
     eligibility: "Farmers, FPOs, State Agri Departments",
     description:
@@ -225,46 +234,65 @@ const GovtSchemesScreen = () => {
       activeOpacity={0.88}
       onPress={() => setSelectedScheme(item)}
     >
-      <View style={styles.schemeCardTop}>
-        <View style={[styles.schemeIconBox, { backgroundColor: item.bgColor }]}>
-          <DynamicIcon lib={item.iconLib} name={item.icon} size={22} color={item.color} />
-        </View>
-        <View style={styles.schemeHeaderInfo}>
-          <View style={[styles.tagBadge, { backgroundColor: item.bgColor }]}>
-            <Text style={[styles.tagText, { color: item.tagColor }]}>{item.category}</Text>
+      {item.image && (
+        <View style={styles.cardImageContainer}>
+          <Image source={{ uri: item.image }} style={styles.cardImage} resizeMode="cover" />
+          <View style={styles.cardImageOverlay}>
+            <View style={[styles.tagBadge, { backgroundColor: item.bgColor }]}>
+              <Text style={[styles.tagText, { color: item.tagColor }]}>{item.category}</Text>
+            </View>
+            <View style={styles.statusBadge}>
+              <View style={[styles.statusDot, { backgroundColor: "#4CAF50" }]} />
+              <Text style={styles.statusText}>{item.status}</Text>
+            </View>
           </View>
-          <View style={styles.statusBadge}>
-            <View style={[styles.statusDot, { backgroundColor: "#4CAF50" }]} />
-            <Text style={styles.statusText}>{item.status}</Text>
-          </View>
         </View>
-      </View>
+      )}
 
-      <Text style={styles.schemeName} numberOfLines={2}>
-        {item.name}
-      </Text>
+      <View style={styles.schemeCardBody}>
+        <View style={styles.schemeCardTop}>
+          <View style={[styles.schemeIconBox, { backgroundColor: item.bgColor }]}>
+            <DynamicIcon lib={item.iconLib} name={item.icon} size={20} color={item.color} />
+          </View>
+          {!item.image && (
+            <View style={styles.schemeHeaderInfo}>
+              <View style={[styles.tagBadge, { backgroundColor: item.bgColor }]}>
+                <Text style={[styles.tagText, { color: item.tagColor }]}>{item.category}</Text>
+              </View>
+              <View style={styles.statusBadge}>
+                <View style={[styles.statusDot, { backgroundColor: "#4CAF50" }]} />
+                <Text style={styles.statusText}>{item.status}</Text>
+              </View>
+            </View>
+          )}
+        </View>
 
-      <View style={styles.benefitRow}>
-        <Ionicons name="gift-outline" size={14} color="#4CAF50" />
-        <Text style={styles.benefitText} numberOfLines={1}>
-          {item.benefit}
+        <Text style={styles.schemeName} numberOfLines={2}>
+          {item.name}
         </Text>
-      </View>
 
-      <Text style={styles.schemeDesc} numberOfLines={2}>
-        {item.description}
-      </Text>
-
-      <View style={styles.cardFooterRow}>
-        <View style={styles.ministryRow}>
-          <Ionicons name="business-outline" size={12} color="#4CAF50" />
-          <Text style={styles.ministryText} numberOfLines={1}>
-            {item.ministry}
+        <View style={styles.benefitRow}>
+          <Ionicons name="gift-outline" size={14} color="#4CAF50" />
+          <Text style={styles.benefitText} numberOfLines={1}>
+            {item.benefit}
           </Text>
         </View>
-        <View style={styles.detailsBtn}>
-          <Text style={styles.detailsBtnText}>View Details</Text>
-          <Ionicons name="chevron-forward" size={13} color="#2E7D32" />
+
+        <Text style={styles.schemeDesc} numberOfLines={2}>
+          {item.description}
+        </Text>
+
+        <View style={styles.cardFooterRow}>
+          <View style={styles.ministryRow}>
+            <Ionicons name="business-outline" size={12} color="#4CAF50" />
+            <Text style={styles.ministryText} numberOfLines={1}>
+              {item.ministry}
+            </Text>
+          </View>
+          <View style={styles.detailsBtn}>
+            <Text style={styles.detailsBtnText}>View Details</Text>
+            <Ionicons name="chevron-forward" size={13} color="#2E7D32" />
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -345,20 +373,27 @@ const GovtSchemesScreen = () => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              {/* Modal Header */}
-              <View style={[styles.modalHeader, { backgroundColor: selectedScheme.color }]}>
-                <View style={styles.modalHeaderContent}>
-                  <View style={styles.modalIconBox}>
-                    <DynamicIcon lib={selectedScheme.iconLib} name={selectedScheme.icon} size={26} color={selectedScheme.color} />
+              {/* Modal Banner / Image Header */}
+              <View style={styles.modalImageContainer}>
+                {selectedScheme.image ? (
+                  <Image source={{ uri: selectedScheme.image }} style={styles.modalCoverImage} resizeMode="cover" />
+                ) : (
+                  <View style={[styles.modalImageFallback, { backgroundColor: selectedScheme.color }]} />
+                )}
+                <View style={styles.modalImageOverlayGradient} />
+                <TouchableOpacity style={styles.modalCloseBtnFloating} onPress={() => setSelectedScheme(null)}>
+                  <Ionicons name="close" size={22} color="#fff" />
+                </TouchableOpacity>
+
+                <View style={styles.modalHeaderInfoOverlay}>
+                  <View style={[styles.modalIconBox, { backgroundColor: selectedScheme.bgColor }]}>
+                    <DynamicIcon lib={selectedScheme.iconLib} name={selectedScheme.icon} size={24} color={selectedScheme.color} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.modalTitle}>{selectedScheme.name}</Text>
                     <Text style={styles.modalMinistry}>{selectedScheme.ministry}</Text>
                   </View>
                 </View>
-                <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setSelectedScheme(null)}>
-                  <Ionicons name="close" size={22} color="#fff" />
-                </TouchableOpacity>
               </View>
 
               <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
@@ -564,7 +599,6 @@ const styles = StyleSheet.create({
   schemeCard: {
     backgroundColor: "#fff",
     borderRadius: 14,
-    padding: 16,
     marginBottom: 14,
     elevation: 2,
     shadowColor: "#2E7D32",
@@ -572,6 +606,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
     borderLeftWidth: 4,
+    overflow: "hidden",
+  },
+  cardImageContainer: {
+    height: 140,
+    width: "100%",
+    position: "relative",
+  },
+  cardImage: {
+    width: "100%",
+    height: "100%",
+  },
+  cardImageOverlay: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    right: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  schemeCardBody: {
+    padding: 14,
   },
   schemeCardTop: {
     flexDirection: "row",
@@ -579,9 +635,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   schemeIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
@@ -606,6 +662,10 @@ const styles = StyleSheet.create({
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
   },
   statusDot: {
     width: 7,
@@ -708,6 +768,41 @@ const styles = StyleSheet.create({
     maxHeight: "92%",
     overflow: "hidden",
   },
+  modalImageContainer: {
+    height: 180,
+    width: "100%",
+    position: "relative",
+    backgroundColor: "#1B5E20",
+  },
+  modalCoverImage: {
+    width: "100%",
+    height: "100%",
+  },
+  modalImageFallback: {
+    width: "100%",
+    height: "100%",
+  },
+  modalImageOverlayGradient: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+  modalCloseBtnFloating: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 20,
+    padding: 6,
+    zIndex: 10,
+  },
+  modalHeaderInfoOverlay: {
+    position: "absolute",
+    bottom: 14,
+    left: 14,
+    right: 14,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   modalHeader: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -720,10 +815,10 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   modalIconBox: {
-    backgroundColor: "rgba(255,255,255,0.25)",
+    backgroundColor: "#fff",
     borderRadius: 12,
-    width: 48,
-    height: 48,
+    width: 46,
+    height: 46,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -737,7 +832,7 @@ const styles = StyleSheet.create({
   },
   modalMinistry: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
+    color: "rgba(255,255,255,0.85)",
     marginTop: 2,
   },
   modalCloseBtn: {
