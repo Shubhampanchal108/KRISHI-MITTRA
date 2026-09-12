@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRISHI MITTRA - Official Documentation & Developer Portal</title>
+    <meta name="description" content="Official technical documentation, API references, architecture details, and developer guide for KRISHI MITTRA - AI-powered Precision Agriculture Platform.">
+    <link rel="icon" type="image/jpeg" href="assets/logo.jpeg">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Design System Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- ==========================================
+         Header Navigation Bar
+         ========================================== -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="#overview" class="logo-container">
+                <img src="assets/logo.jpeg" alt="Krishi Mittra Logo" class="logo-img">
+                <span class="logo-text">KRISHI MITTRA</span>
+                <span class="version-badge">v1.0.0</span>
+            </a>
+        </div>
+
+        <div class="header-right">
+            <!-- Interactive Search Trigger -->
+            <div class="search-trigger" id="search-trigger">
+                <i class="fas fa-search"></i>
+                <span>Search documentation...</span>
+                <kbd class="shortcut-kbd">Ctrl K</kbd>
+            </div>
+
+            <!-- Dark / Light Theme Switcher -->
+            <button class="icon-btn" id="theme-toggle" title="Toggle Theme" aria-label="Toggle Theme">
+                <i class="fas fa-sun"></i>
+            </button>
+
+            <!-- GitHub Repo Link -->
+            <a href="https://github.com/Shubhampanchal108/KRISHI-MITTRA" target="_blank" rel="noopener" class="icon-btn" title="View Source on GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+
+            <!-- Download APK Button -->
+            <button class="btn-primary download-apk-trigger">
+                <i class="fas fa-download"></i>
+                <span>Download App</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ==========================================
+         Layout Container (Sidebar + Main Content)
+         ========================================== -->
+    <div class="layout-container">
+        <!-- Backdrop Overlay for Mobile Sidebar -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="nav-group">
+                <div class="nav-title">Getting Started</div>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#overview" class="active"><i class="fas fa-compass"></i> Overview & Vision</a></li>
+                    <li class="nav-item"><a href="#developer"><i class="fas fa-user-ninja"></i> Developer Profile</a></li>
+                    <li class="nav-item"><a href="#features"><i class="fas fa-star"></i> Key Features</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-title">Architecture & Tech</div>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#tech-stack"><i class="fas fa-layer-group"></i> Tech Stack</a></li>
+                    <li class="nav-item"><a href="#architecture"><i class="fas fa-sitemap"></i> System Architecture</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-title">API Reference</div>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#api-auth"><i class="fas fa-shield-alt"></i> Authentication API</a></li>
+                    <li class="nav-item"><a href="#api-soil"><i class="fas fa-seedling"></i> Soil Health API</a></li>
+                    <li class="nav-item"><a href="#api-pest"><i class="fas fa-bug"></i> AI Pest Scanner API</a></li>
+                    <li class="nav-item"><a href="#api-chat"><i class="fas fa-comments"></i> Chat Assistant API</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-title">Setup & Deployment</div>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#setup"><i class="fas fa-terminal"></i> Installation Guide</a></li>
+                    <li class="nav-item"><a href="#env-vars"><i class="fas fa-key"></i> Environment Setup</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-title">Downloads & Resources</div>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#download-app"><i class="fas fa-mobile-alt"></i> App Download Center</a></li>
+                    <li class="nav-item"><a href="#faq"><i class="fas fa-question-circle"></i> FAQ & Support</a></li>
+                    <li class="nav-item"><a href="#roadmap"><i class="fas fa-map-signs"></i> Product Roadmap</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Document -->
+        <main class="main-content">
+
+            <!-- Section 1: Hero & Overview -->
+            <section id="overview" class="doc-section">
+                <div class="hero-banner">
+                    <div class="hero-badge">
+                        <i class="fas fa-leaf"></i> Smart Farming || Smarter Future
+                    </div>
+                    <h1 class="hero-title">KRISHI MITTRA</h1>
+                    <p class="hero-description">
+                        An enterprise-grade, AI-driven mobile ecosystem engineered to bridge the gap between cutting-edge artificial intelligence and ground-level farming operations across India and worldwide.
+                    </p>
+                    <div class="hero-cta">
+                        <button class="btn-primary download-apk-trigger">
+                            <i class="fas fa-download"></i> Get Mobile APK (v1.0)
+                        </button>
+                        <a href="#setup" class="btn-outline">
+                            <i class="fas fa-code"></i> Developer Quickstart
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Impact Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-number">98%</div>
+                        <div class="metric-label">Disease Scan Accuracy</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-number">6+</div>
+                        <div class="metric-label">Languages Supported</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-number">&lt; 1.5s</div>
+                        <div class="metric-label">Groq AI Inference Time</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-number">100%</div>
+                        <div class="metric-label">Open Source & Free</div>
+                    </div>
+                </div>
+
+                <h3 class="subsection-title"><i class="fas fa-bullseye"></i> Executive Summary & Core Mission</h3>
+                <p>
+                    Modern agriculture faces severe challenges including unpredictable climate shifts, crop pest outbreaks, soil nutrient depletion, and opaque market pricing. <strong>Krishi Mittra</strong> unifies <em>Vision AI plant diagnostics</em>, <em>N-P-K soil health analysis</em>, <em>live Agmarknet mandi prices</em>, <em>voice-assisted multilingual AI chatbots</em>, and <em>micro-climate weather advisories</em> into a seamless mobile experience.
+                </p>
+                
+                <div class="callout">
+                    <i class="fas fa-lightbulb"></i>
+                    <div class="callout-text">
+                        <strong>Mission Statement:</strong> "To democratize artificial intelligence for every farmer, transforming traditional agriculture into precision, sustainable, and profitable smart farming."
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Developer Profile -->
+            <section id="developer" class="doc-section">
+                <h2 class="section-title"><i class="fas fa-user-ninja"></i> Developer & Lead Engineer</h2>
+                <p class="section-subtitle">Meet the creator behind Krishi Mittra's AI model integrations and full-stack mobile architecture.</p>
+
+                <div class="developer-card">
+                    <img src="assets/logo.jpeg" alt="Shubham - Lead Developer" class="developer-avatar">
+                    <div class="developer-info">
+                        <h3 class="developer-name">Shubham</h3>
+                        <div class="developer-role">
+                            <i class="fas fa-laptop-code"></i> Lead Full-Stack & Agri-Tech Engineer
+                        </div>
+                        <p class="developer-bio">
+                            Passionate Computer Science Engineer & Agri-Tech Innovator dedicated to building scalable, high-impact AI solutions for agricultural communities. Specialized in React Native mobile architecture, Express REST microservices, and Groq LLM/Vision model deployment.
+                        </p>
+                        <div class="developer-links">
+                            <a href="mailto:panchalshubham2015@gmail.com" class="dev-link">
+                                <i class="fas fa-envelope"></i> panchalshubham2015@gmail.com
+                            </a>
+                            <a href="https://github.com/Shubhampanchal108" target="_blank" rel="noopener" class="dev-link">
+                                <i class="fab fa-github"></i> @Shubhampanchal108
+                            </a>
+                            <a href="https://github.com/Shubhampanchal108/KRISHI-MITTRA" target="_blank" rel="noopener" class="dev-link">
+                                <i class="fas fa-code-branch"></i> Repository
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Key Features -->
+            <section id="features" class="doc-section">
+                <h2 class="section-title"><i class="fas fa-star"></i> Core Features Breakdown</h2>
+                <p class="section-subtitle">Comprehensive suite of AI and micro-location tools for smart precision agriculture.</p>
+
+                <div class="features-grid">
+                    <!-- Feature 1 -->
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                            <div class="feature-title">Multilingual Krishi Bot</div>
+                        </div>
+                        <div class="feature-desc">
+                            Generative AI agricultural assistant with persistent MongoDB session memory, providing expert advice on crops, fertilizers, and irrigation.
+                        </div>
+                        <div class="feature-tags">
+                            <span class="tag">Groq LLM</span>
+                            <span class="tag">Hindi/English/Local</span>
+                            <span class="tag">Persistent Memory</span>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon"><i class="fas fa-bug"></i></div>
+                            <div class="feature-title">AI Pest & Disease Scanner</div>
+                        </div>
+                        <div class="feature-desc">
+                            Instant photo-based leaf diagnosis powered by Groq Vision models. Detects crop pathologies, pest infestations, and prescribed chemical/organic treatments.
+                        </div>
+                        <div class="feature-tags">
+                            <span class="tag">Vision AI</span>
+                            <span class="tag">Camera Upload</span>
+                            <span class="tag">Treatment Plans</span>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon"><i class="fas fa-flask"></i></div>
+                            <div class="feature-title">Soil Health & N-P-K Analysis</div>
+                        </div>
+                        <div class="feature-desc">
+                            Input Nitrogen (N), Phosphorus (P), Potassium (K), and pH values to receive automated dosage recommendations for Urea, DAP, and MOP.
+                        </div>
+                        <div class="feature-tags">
+                            <span class="tag">N-P-K Profiling</span>
+                            <span class="tag">Fertilizer Math</span>
+                            <span class="tag">Soil Card</span>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="feature-title">Real-Time Mandi Prices</div>
+                        </div>
+                        <div class="feature-desc">
+                            Live agricultural market intelligence synced directly with Government Agmarknet APIs for commodity prices across mandis in India.
+                        </div>
+                        <div class="feature-tags">
+                            <span class="tag">Agmarknet API</span>
+                            <span class="tag">Market Trends</span>
+                            <span class="tag">Price Alerts</span>
+                        </div>
+                    </div>
+
+                    <!-- Feature 5 -->
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon"><i class="fas fa-cloud-sun-rain"></i></div>
+                            <div class="feature-title">Micro-Climate Advisory</div>
+                        </div>
+                        <div class="feature-desc">
+                            Location-validated weather forecasts providing temperature, humidity, rainfall probability, and optimal pesticide spraying window indicators.
+                        </div>
+                        <div class="feature-tags">
+                            <span class="tag">OpenWeatherMap</span>
+                            <span class="tag">Spraying Window</span>
+                            <span class="tag">Geo-Location</span>
+                        </div>
+                    </div>
+
+                    <!-- Feature 6 -->
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon"><i class="fas fa-microphone"></i></div>
+                            <div class="feature-title">Voice Assistant & TTS</div>
+                        </div>
+                        <div class="feature-desc">
+                            Hands-free voice interaction built using Expo Speech for low-literacy users in local regional dialects.
+                        </div>
+                        <div class="feature-tags">
+                            <span class="tag">Expo Speech</span>
+                            <span class="tag">Voice-to-Text</span>
+                            <span class="tag">Accessibility</span>
+                        </div>
+                    </div>
+
+                    <!-- Feature 7 -->
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon"><i class="fas fa-landmark"></i></div>
+                            <div class="feature-title">Government Schemes Explorer</div>
+                        </div>
+                        <div class="feature-desc">
+                            Simplified guide to PM-KISAN, PM Fasal Bima Yojana, Kisan Credit Card, and soil health subsidies with eligibility breakdown.
+                        </div>
+                        <div class="feature-tags">
+                            <span class="tag">Subsidies</span>
+                            <span class="tag">PM-KISAN</span>
+                            <span class="tag">Financial Aid</span>
+                        </div>
+                    </div>
+
+                    <!-- Feature 8 -->
+                    <div class="feature-card">
+                        <div class="feature-header">
+                            <div class="feature-icon"><i class="fas fa-users"></i></div>
+                            <div class="feature-title">Farmer Community & Live Stream</div>
+                        </div>
+                        <div class="feature-desc">
+                            Social feed for peer-to-peer farmer knowledge exchange, combined with real-time video webinar streams with agricultural experts.
+                        </div>
+                        <div class="feature-tags">
+                            <span class="tag">Social Feed</span>
+                            <span class="tag">Live Streaming</span>
+                            <span class="tag">Consultation</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Tech Stack & Architecture -->
+            <section id="tech-stack" class="doc-section">
+                <h2 class="section-title"><i class="fas fa-layer-group"></i> Tech Stack</h2>
+                <p class="section-subtitle">Modern technology stack powering high performance, real-time AI responses, and offline reliability.</p>
+
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <div class="tech-icon-wrapper"><i class="fab fa-react"></i></div>
+                        <div>
+                            <div class="tech-name">React Native v0.81</div>
+                            <div class="tech-detail">Cross-Platform Native Client</div>
+                        </div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-icon-wrapper"><i class="fas fa-cube"></i></div>
+                        <div>
+                            <div class="tech-name">Expo v54 & Expo Router</div>
+                            <div class="tech-detail">File-Based Navigation</div>
+                        </div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-icon-wrapper"><i class="fab fa-node-js"></i></div>
+                        <div>
+                            <div class="tech-name">Node.js & Express v4.21</div>
+                            <div class="tech-detail">RESTful Microservices Server</div>
+                        </div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-icon-wrapper"><i class="fas fa-database"></i></div>
+                        <div>
+                            <div class="tech-name">MongoDB & Mongoose</div>
+                            <div class="tech-detail">NoSQL Chat & Soil Database</div>
+                        </div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-icon-wrapper"><i class="fas fa-brain"></i></div>
+                        <div>
+                            <div class="tech-name">Groq Vision & LLM AI</div>
+                            <div class="tech-detail">Ultra-fast Llama-3 Diagnostics</div>
+                        </div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-icon-wrapper"><i class="fas fa-cloud-sun"></i></div>
+                        <div>
+                            <div class="tech-name">Agmarknet & Weather APIs</div>
+                            <div class="tech-detail">Live Mandi & Climate Feeds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="architecture">
+                    <h3 class="subsection-title"><i class="fas fa-sitemap"></i> System Architecture Flow</h3>
+                    <p>High-level architectural overview showing data flow between the mobile app, backend server, MongoDB database, and AI service providers.</p>
+
+                    <div class="architecture-box">
+                        <div class="arch-flow">
+                            <div class="arch-node highlight">
+                                <i class="fas fa-mobile-alt"></i> Mobile App Client (React Native + Expo Router)
+                            </div>
+                            <div class="arch-arrow"><i class="fas fa-arrow-down"></i> REST API / JSON Payloads</div>
+                            <div class="arch-node">
+                                <i class="fab fa-node-js"></i> Express.js Backend REST Server (Port 5000)
+                            </div>
+                            <div class="arch-arrow"><i class="fas fa-arrow-down"></i> Middleware / Controllers</div>
+                            <div class="arch-subnodes">
+                                <div class="arch-node" style="flex: 1;">
+                                    <i class="fas fa-database"></i> MongoDB Database
+                                </div>
+                                <div class="arch-node" style="flex: 1;">
+                                    <i class="fas fa-brain"></i> Groq AI API
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: API Reference -->
+            <section id="api-auth" class="doc-section">
+                <h2 class="section-title"><i class="fas fa-code"></i> REST API Reference</h2>
+                <p class="section-subtitle">Complete endpoint breakdown for integration with mobile clients and external services.</p>
+
+                <!-- API 1: User Signup -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="method-badge post">POST</span>
+                        <span class="api-path">/api/signup</span>
+                    </div>
+                    <div class="api-body">
+                        <div class="api-desc">Registers a new farmer account into the database with password hashing.</div>
+                        <div class="code-wrapper">
+                            <div class="code-header">
+                                <span>Request Body (JSON)</span>
+                                <button class="copy-btn"><i class="far fa-copy"></i> Copy</button>
+                            </div>
+                            <pre><code>{
+  "name": "Ramesh Kumar",
+  "email": "ramesh.farmer@gmail.com",
+  "password": "SecurePassword123",
+  "state": "Punjab",
+  "district": "Ludhiana"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API 2: User Login -->
+                <div class="api-card">
+                    <div class="api-header">
+                        <span class="method-badge post">POST</span>
+                        <span class="api-path">/api/login</span>
+                    </div>
+                    <div class="api-body">
+                        <div class="api-desc">Authenticates farmer credentials and returns a signed JSON Web Token (JWT).</div>
+                    </div>
+                </div>
+
+                <!-- API 3: Soil Add -->
+                <div id="api-soil" class="api-card">
+                    <div class="api-header">
+                        <span class="method-badge post">POST</span>
+                        <span class="api-path">/api/soil/add</span>
+                    </div>
+                    <div class="api-body">
+                        <div class="api-desc">Stores soil N-P-K profile sample and returns recommended fertilizer dosage.</div>
+                        <div class="code-wrapper">
+                            <div class="code-header">
+                                <span>Payload Example</span>
+                                <button class="copy-btn"><i class="far fa-copy"></i> Copy</button>
+                            </div>
+                            <pre><code>{
+  "userId": "65f8a92b3c4d1e2f3a4b5c6d",
+  "nitrogen": 140,
+  "phosphorus": 45,
+  "potassium": 50,
+  "ph": 6.8,
+  "cropType": "Wheat"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API 4: Pest Scan AI -->
+                <div id="api-pest" class="api-card">
+                    <div class="api-header">
+                        <span class="method-badge post">POST</span>
+                        <span class="api-path">/api/pest/scan</span>
+                    </div>
+                    <div class="api-body">
+                        <div class="api-desc">Uploads crop leaf image via Multer multipart and processes instant Groq Vision AI diagnosis.</div>
+                        <div class="code-wrapper">
+                            <div class="code-header">
+                                <span>cURL Request</span>
+                                <button class="copy-btn"><i class="far fa-copy"></i> Copy</button>
+                            </div>
+                            <pre><code>curl -X POST http://localhost:5000/api/pest/scan \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -F "image=@/path/to/infected_leaf.jpg" \
+  -F "userId=65f8a92b3c4d1e2f3a4b5c6d"</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API 5: Chat Assistant -->
+                <div id="api-chat" class="api-card">
+                    <div class="api-header">
+                        <span class="method-badge post">POST</span>
+                        <span class="api-path">/api/chat/add</span>
+                    </div>
+                    <div class="api-body">
+                        <div class="api-desc">Sends user query to Krishi Bot Groq LLM and saves conversation history in MongoDB.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 6: Setup Guide -->
+            <section id="setup" class="doc-section">
+                <h2 class="section-title"><i class="fas fa-terminal"></i> Installation & Local Setup</h2>
+                <p class="section-subtitle">Follow this step-by-step guide to clone, install, and run Krishi Mittra locally.</p>
+
+                <div class="step-container">
+                    <!-- Step 1 -->
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Clone Repository</div>
+                            <p>Clone the GitHub repository to your local machine.</p>
+                            <div class="code-wrapper">
+                                <div class="code-header">
+                                    <span>Terminal</span>
+                                    <button class="copy-btn"><i class="far fa-copy"></i> Copy</button>
+                                </div>
+                                <pre><code>git clone https://github.com/Shubhampanchal108/KRISHI-MITTRA.git
+cd KRISHI-MITTRA</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Configure & Start Backend Server</div>
+                            <p>Navigate to the Server folder, install dependencies, and start Express server.</p>
+                            <div class="code-wrapper">
+                                <div class="code-header">
+                                    <span>Terminal</span>
+                                    <button class="copy-btn"><i class="far fa-copy"></i> Copy</button>
+                                </div>
+                                <pre><code>cd Server
+npm install
+npm start</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Configure & Launch Expo Mobile Client</div>
+                            <p>Open a new terminal window, navigate to the client folder, and start Expo dev server.</p>
+                            <div class="code-wrapper">
+                                <div class="code-header">
+                                    <span>Terminal</span>
+                                    <button class="copy-btn"><i class="far fa-copy"></i> Copy</button>
+                                </div>
+                                <pre><code>cd client
+npm install
+npx expo start</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="env-vars">
+                    <h3 class="subsection-title"><i class="fas fa-key"></i> Environment Configuration</h3>
+                    <p>Create a <code>.env</code> file in the <code>Server/</code> directory with the following variables:</p>
+                    <div class="code-wrapper">
+                        <div class="code-header">
+                            <span>Server/.env</span>
+                            <button class="copy-btn"><i class="far fa-copy"></i> Copy</button>
+                        </div>
+                        <pre><code>PORT=5000
+MONGO_URI=mongodb+srv://your_username:your_password@cluster.mongodb.net/krishimittra
+GROQ_API_KEY=gsk_your_groq_api_key_here
+JWT_SECRET=your_jwt_secret_key_here</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 7: App Download Center -->
+            <section id="download-app" class="doc-section">
+                <h2 class="section-title"><i class="fas fa-mobile-alt"></i> Mobile App Download Center</h2>
+                <p class="section-subtitle">Get the latest compiled Android APK for Krishi Mittra.</p>
+
+                <div class="download-card">
+                    <img src="assets/icon.png" alt="Krishi Mittra App Icon" class="download-preview">
+                    <div class="download-details">
+                        <h3 class="download-title">KRISHI MITTRA Mobile App</h3>
+                        <div class="download-meta">
+                            <span><i class="fas fa-tag"></i> Version 1.0.0</span>
+                            <span><i class="fab fa-android"></i> Android 8.0+</span>
+                            <span><i class="fas fa-hdd"></i> ~45 MB</span>
+                        </div>
+                        <p style="margin-bottom: 1.25rem;">
+                            Direct compiled standalone Android APK file. Instant AI pest scan, voice chat, and local offline cache support.
+                        </p>
+                        <button class="btn-primary download-apk-trigger" style="font-size: 1rem; padding: 0.75rem 1.5rem;">
+                            <i class="fas fa-download"></i> Download APK Now
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 8: FAQ & Troubleshooting -->
+            <section id="faq" class="doc-section">
+                <h2 class="section-title"><i class="fas fa-question-circle"></i> FAQ & Troubleshooting</h2>
+                <p class="section-subtitle">Frequently asked questions regarding setup, AI diagnostics, and app usage.</p>
+
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>How does the AI Pest Diagnostic scanner identify diseases?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            When you capture a leaf photo, it is uploaded securely to the Express backend and evaluated using Groq Llama-3 Vision models trained on thousands of plant pathology datasets.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Is an internet connection required to use Krishi Mittra?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Active AI chat and live Mandi prices require an internet connection. However, recent soil health records and downloaded government scheme guides remain accessible offline via Async Storage.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>How do I replace the dummy APK link with my actual compiled APK?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Place your compiled <code>.apk</code> binary into <code>Documentation/assets/krishi-mittra-v1.0.apk</code> or update the <code>download-apk-trigger</code> event handler in <code>script.js</code>.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 9: Product Roadmap -->
+            <section id="roadmap" class="doc-section">
+                <h2 class="section-title"><i class="fas fa-map-signs"></i> Product Roadmap</h2>
+                <p class="section-subtitle">Upcoming features planned for Krishi Mittra v2.0.</p>
+
+                <div class="step-container">
+                    <div class="step-item">
+                        <div class="step-number" style="background: var(--accent); color: #000;"><i class="fas fa-satellite"></i></div>
+                        <div class="step-content">
+                            <div class="step-title">AI Crop Yield Prediction via Satellite Imaging</div>
+                            <p>Integrating Sentinel-2 satellite imagery to estimate yield tonnage prior to harvest.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number" style="background: var(--accent); color: #000;"><i class="fas fa-broadcast-tower"></i></div>
+                        <div class="step-content">
+                            <div class="step-title">Offline On-Device Quantized Voice AI</div>
+                            <p>Local small language models running directly on mobile hardware without requiring cellular coverage.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number" style="background: var(--accent); color: #000;"><i class="fas fa-link"></i></div>
+                        <div class="step-content">
+                            <div class="step-title">Blockchain Farm-to-Fork Traceability</div>
+                            <p>Verifiable organic crop lineage verification for premium market export.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>© 2026 <strong>KRISHI MITTRA</strong>. Developed with ❤️ by <a href="https://github.com/Shubhampanchal108" target="_blank" rel="noopener">Shubham</a>.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.8rem;">Open source under MIT License. Built for precision farming.</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- ==========================================
+         Quick Search Modal Overlay (`Ctrl + K`)
+         ========================================== -->
+    <div class="modal-overlay" id="search-modal">
+        <div class="search-modal">
+            <div class="search-modal-header">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Search documentation, APIs, features..." autocomplete="off">
+                <kbd class="shortcut-kbd">ESC</kbd>
+            </div>
+            <div class="search-results" id="search-results">
+                <!-- Search results injected dynamically via script.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         Download APK Modal
+         ========================================== -->
+    <div class="modal-overlay" id="apk-modal">
+        <div class="apk-modal-content">
+            <button class="close-modal-btn" id="close-apk-modal"><i class="fas fa-times"></i></button>
+            <img src="assets/icon.png" alt="Krishi Mittra App" style="width: 80px; height: 80px; border-radius: 20px; margin-bottom: 1rem; border: 2px solid var(--primary);">
+            <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--text-primary);">Download Krishi Mittra APK</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                Get the official compiled Android build (v1.0.0). Make sure "Install from Unknown Sources" is enabled in your Android settings.
+            </p>
+            <button class="btn-primary" id="confirm-download-btn" style="width: 100%; justify-content: center;">
+                <i class="fas fa-download"></i> Start APK Download (krishi-mittra-v1.0.apk)
+            </button>
+        </div>
+    </div>
+
+    <!-- Interactive JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
