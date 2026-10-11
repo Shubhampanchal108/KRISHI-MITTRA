@@ -22,7 +22,7 @@ Rules:
 3. Respond with ONLY that one word. No explanation, no punctuation, no formatting, no other text.`;
 
     const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: [
         {
           role: "user",

@@ -136,7 +136,7 @@ export async function LLM(query, providedContext = null) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "openai/gpt-oss-120b",
         messages,
         temperature: 0.7,
       }),
@@ -193,7 +193,7 @@ export async function WeatherLLM(data) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "openai/gpt-oss-120b",
         messages: [
           { role: "system", content: getWeatherInstruction() },
           { role: "user", content: promptUser },

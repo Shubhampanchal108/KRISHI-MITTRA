@@ -24,7 +24,7 @@ async function liveAudioProcessing(filePath) {
     console.log("Transcribed Audio:", transcription.text);
 
     const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: [
         { role: "system", content: "You are a helpful agricultural assistant. STRICT RULE: You must respond ONLY in pure Hindi language using Devanagari script. Do NOT use Hinglish (Latin script) or English. Greet and respond in a friendly tone." },
         { role: "user", content: transcription.text },
