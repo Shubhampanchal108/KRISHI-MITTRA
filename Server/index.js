@@ -27,6 +27,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'Middlewares', 'uploads'
 app.get('/', (req, res) => {
   res.send('Krishi Mittra server is Running...');
 });
+
 app.use('/api/main', Routes);
 
 // Global Express Error Middleware

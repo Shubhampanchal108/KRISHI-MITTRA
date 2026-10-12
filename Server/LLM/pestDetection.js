@@ -194,7 +194,7 @@ async function PestScanner(imageUrl, query) {
     ];
 
     const response = await groq.chat.completions.create({
-      model: "llama-3.2-11b-vision-instruct",
+      model: "qwen/qwen3.8-27b",
       messages: messages,
       temperature: 0.7,
       max_completion_tokens: 1024,
