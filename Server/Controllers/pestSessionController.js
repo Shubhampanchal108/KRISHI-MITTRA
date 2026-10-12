@@ -437,7 +437,7 @@ CRITICAL OUTPUT RULE: Do NOT include any internal thoughts, chain-of-thought, re
     }
 
     const response = await groq.chat.completions.create({
-      model: "qwen/qwen3.6-27b",
+      model: "qwen/qwen3.8-27b",
       messages: messages,
       temperature: 0.7,
       max_completion_tokens: 800,
