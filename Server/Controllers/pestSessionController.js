@@ -208,7 +208,7 @@ const startScan = async (req, res) => {
     ];
 
     const response = await groq.chat.completions.create({
-      model: "qwen/qwen3.6-27b",
+      model: "qwen/qwen3.8-27b",
       messages: messages,
       temperature: 0.2,
       max_completion_tokens: 4096,
